@@ -87,3 +87,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Visual Studio settings
+.vs/
+/plugin.video.unofficialkissanime/icon.png
+/plugin.video.unofficialkissanime.zip
