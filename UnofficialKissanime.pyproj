@@ -25,6 +25,9 @@
     <Content Include="addon.xml">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="copyToKodi.cmd">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="createzip.cmd">
       <SubType>Code</SubType>
     </Content>
@@ -43,18 +46,22 @@
     <Folder Include="resources\" />
     <Folder Include="resources\lib\" />
     <Folder Include="resources\language\" />
+    <Folder Include="resources\lib\common\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="default.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="resources\lib\controller.py">
+    <Compile Include="resources\lib\common\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="resources\lib\lists.py">
+    <Compile Include="resources\lib\common\controller.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="resources\lib\sources.py">
+    <Compile Include="resources\lib\common\lists.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="resources\lib\common\sources.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="resources\lib\__init__.py">

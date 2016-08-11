@@ -19,7 +19,7 @@
 
 
 import urlparse,sys
-from resources.lib import controller
+from resources.lib.common import controller
 
 
 params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
@@ -28,6 +28,7 @@ action = params.get('action')
 if action == None:
     controller.Controller().main_menu()
 elif action == 'genericList':
+    print "showing list"
     controller.Controller().show_list(params)
 elif action == 'mediaContainerList':
     controller.Controller().show_media_container_list(params)
