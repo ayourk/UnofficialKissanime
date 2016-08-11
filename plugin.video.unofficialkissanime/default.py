@@ -19,14 +19,11 @@
 
 
 import urlparse,sys
-
-print "hello world"
-
-
-'''params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
-action = params.get('action')
-
 from resources.lib import controller
+
+
+params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
+action = params.get('action')
 
 if action == None:
     controller.Controller().main_menu()
@@ -38,4 +35,3 @@ elif action == 'mediaList':
     controller.Controller().show_media_list(params)
 else:
     print "WHAT HAVE YOU DONE?"
-    '''
