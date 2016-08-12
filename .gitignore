@@ -91,5 +91,5 @@ ENV/
 .vs/
 plugin.video.unofficialkissanime/
 plugin.video.unofficialkissanime.zip
-.pyproj
-.sln
+/UnofficialKissanime.pyproj
+/UnofficialKissanime.sln
