@@ -90,5 +90,7 @@ ENV/
 
 # Visual Studio settings
 .vs/
-/plugin.video.unofficialkissanime/icon.png
-/plugin.video.unofficialkissanime.zip
+plugin.video.unofficialkissanime/
+plugin.video.unofficialkissanime.zip
+.pyprof
+.sln
