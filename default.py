@@ -18,21 +18,25 @@
 '''
 
 
-import urlparse,sys
+from resources.lib.common.helpers import helper
 from resources.lib.common import controller
 
 
-params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
+print "type: %s" % str(type(helper))
+helper.location("default entry point")
+
+params = dict(helper.queries)
 action = params.get('action')
 
 if action == None:
     controller.Controller().main_menu()
 elif action == 'genericList':
-    print "showing list"
     controller.Controller().show_list(params)
 elif action == 'mediaContainerList':
     controller.Controller().show_media_container_list(params)
 elif action == 'mediaList':
     controller.Controller().show_media_list(params)
 else:
-    print "WHAT HAVE YOU DONE?"
+    helper.log_error("WHAT HAVE YOU DONE?")
+
+helper.location("default exit point")

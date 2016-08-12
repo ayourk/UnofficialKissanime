@@ -18,21 +18,30 @@
 '''
 
 
-import urlparse,sys
-from resources.lib.common import controller
+import sys, urllib
+from addon.common.addon import Addon
+from resources.lib.common import constants
 
 
-params = dict(urlparse.parse_qsl(sys.argv[2][1:]))
-action = params.get('action')
+# I like to define my module variables at the top, which explains the purpose 
+# of this init function, invoked at the bottom
+def init():
+    helper = Helper(constants.plugin_name, argv=sys.argv)
+    return helper
 
-if action == None:
-    controller.Controller().main_menu()
-elif action == 'genericList':
-    print "showing list"
-    controller.Controller().show_list(params)
-elif action == 'mediaContainerList':
-    controller.Controller().show_media_container_list(params)
-elif action == 'mediaList':
-    controller.Controller().show_media_list(params)
-else:
-    print "WHAT HAVE YOU DONE?"
+
+class Helper(Addon):
+    def build_plugin_url(self, queries):
+        return self.url + '?' + urllib.urlencode(queries)
+
+    def location(self, msg):
+        self.log_debug("----LOC  : " + msg)
+
+    def start(self, msg):
+        self.log_debug("----START: " + msg)
+
+    def end(self, msg):
+        self.log_debug("----END  : " + msg)
+
+
+helper = init()
