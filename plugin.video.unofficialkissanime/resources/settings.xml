@@ -1,5 +1,0 @@
-<settings>
-    <category label="General">
-        <setting id="test" type="bool" default="false"/>
-    </category>
-</settings>

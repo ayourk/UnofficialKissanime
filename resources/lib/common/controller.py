@@ -18,7 +18,7 @@
 '''
 
 
-import re, xbmc, xbmcgui, xbmcplugin, urlresolver
+import re, xbmc, xbmcgui, xbmcplugin, urlresolver, xbmcaddon
 from resources.lib.common import lists, constants
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
@@ -84,31 +84,62 @@ class Controller:
             links = soup.find('table', class_='listing').find_all('a')
             helper.log_debug('# of links found: %d' % len(links))
         links.reverse() # sort episodes in ascending order by default
-        self._create_media_list(links, 'media')
+        quality_is_select = helper.get_setting('default-quality') == 'Select'
+        if quality_is_select:
+            self._create_media_list(links, 'media')
+        else:
+            self._create_media_list(links, 'media', is_folder=False, is_playable=True)
         helper.end("show_media_list")
         return
 
+    # Can either display qualities or play videos directly depending on the settings
     def show_media(self, params):
         helper.start('show_media')
         html = self._get_html_from_params(params)
-        links = []
+
+        default_quality = helper.get_setting('default-quality')
+        quality_is_select = default_quality == 'Select'
+        helper.log_debug("preset quality: %s, select_set: %s" % (default_quality, str(quality_is_select)))
         media_list = lists.GenericList()
+        url_to_play = None
         if html != '':
             soup = BeautifulSoup(html)
             encoded_links = soup.find(id='selectQuality').find_all('option')
             for option in encoded_links:
-                name = option.string
-                link_val = option['value'].decode('base-64')
-                media_list.add_dir_item(name, {'srctype':'web', 'value':link_val, 'action':'play'}, isFolder=False, isPlayable=True)
-        media_list.end_dir()
+                quality = option.string
+                link_val = urlresolver.resolve(option['value'].decode('base-64'))
+                if quality_is_select:
+                    media_list.add_dir_item(quality, {'srctype':'web', 'value':link_val, 'action':'play'}, isFolder=False, isPlayable=True)
+                else:
+                    helper.log_debug('quality: %s, default: %s' % (quality, str(default_quality)))
+                    if int(default_quality.strip('p')) >= int(quality.strip('p')):
+                        url_to_play = urlresolver.resolve(link_val)
+                        break
+
+            # Quality is pre-set, so go ahead and play the video
+            if not quality_is_select:
+                helper.location('1')
+                if len(encoded_links) == 0:
+                    helper.location('2')
+                    helper.show_error_dialog(["There doesn't seem to be any available links to play.  Please try again later.",'','If there are links on the main website, please contact the developer.'])
+                    return
+                elif url_to_play == None:
+                    helper.location('3')
+                    # The default quality is below what's available, so choose
+                    # the lowest quality one
+                    url_to_play = urlresolver.resolve(encoded_links[-1]['value'].decode('base-64'))
+                helper.location('4')
+                self.play_video({'value':url_to_play})
+
+        if quality_is_select:
+            helper.location('5')
+            media_list.end_dir()
+            
         helper.end('show_media')
         return
 
     def play_video(self, params):
-        url_val = params['value']
-        print url_val
-        url = urlresolver.resolve(url_val)
-        print 'url: %s' % url
+        url = params['value']
         play_item = xbmcgui.ListItem(path=url)
         xbmcplugin.setResolvedUrl(helper.handle, True, play_item)
 
@@ -135,7 +166,7 @@ class Controller:
         helper.log_debug('HTML is %sempty' % ('' if html == '' else 'not '))
         return html
 
-    def _create_media_list(self, links, action, filter=None, next_action=None):
+    def _create_media_list(self, links, action, filter=None, next_action=None, is_folder=True, is_playable=False):
         '''
             Helper for creating a media or media container list.  The filter 
             parameter allows us to filter out any links while iterating, and 
@@ -152,7 +183,7 @@ class Controller:
             if filter != None and re.search(filter, link['href']) != None:
                 continue
             name = link.string.strip()
-            media_list.add_dir_item(name, {'srctype':'web', 'value':link['href'], 'action':action})
+            media_list.add_dir_item(name, {'srctype':'web', 'value':link['href'], 'action':action}, isFolder=is_folder, isPlayable=is_playable)
         if next_action != None:
             media_list.add_dir_item(links[-2].string, {'srctype':'web', 'value':links[-2]['href'], 'action':next_action})
             media_list.add_dir_item(links[-1].string, {'srctype':'web', 'value':links[-1]['href'], 'action':next_action})

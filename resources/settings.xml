@@ -1,5 +1,5 @@
 <settings>
     <category label="General">
-        <setting id="test" type="bool" default="false"/>
+        <setting id="default-quality" label="Default Quality" type="labelenum" values="Select|1080p|720p|480p|360p"/>
     </category>
 </settings>
