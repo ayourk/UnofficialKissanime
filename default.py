@@ -36,7 +36,12 @@ elif action == 'mediaContainerList':
     controller.Controller().show_media_container_list(params)
 elif action == 'mediaList':
     controller.Controller().show_media_list(params)
+elif action == 'media':
+    controller.Controller().show_media(params)
+elif action == 'play':
+    controller.Controller().play_video(params)
 else:
     helper.log_error("WHAT HAVE YOU DONE?")
+    helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])
 
 helper.location("default exit point")

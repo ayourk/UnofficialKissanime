@@ -26,10 +26,11 @@ class BaseList(object):
     def __init__(self):
         return
 
-    def add_dir_item(self, name, query, thumb=None, icon=None, isFolder=True):
+    def add_dir_item(self, name, query, thumb=None, icon=None, isFolder=True, isPlayable=False):
         url = helper.build_plugin_url(query)
-        helper.log_debug("adding dir item - name: %s, url: %s" % (name, str(url)))
+        helper.log_debug("adding dir item - url: %s" % str(url)) # not printing names due to funky characters
         li = xbmcgui.ListItem(name, "test", iconImage=icon, thumbnailImage=thumb)
+        li.setProperty('IsPlayable', 'true' if isPlayable else 'false')
         xbmcplugin.addDirectoryItem(handle=helper.handle, url=url, listitem=li, isFolder=isFolder)
         return
 

@@ -172,12 +172,17 @@ class NetHelper(Net):
         return
 
     def get_html(self, url, cookies, referer):
+        html = ''
         try:
             self.set_cookies(cookies)
             html = self.http_GET(url, headers={'Referer':referer}).content
+            if html != '':
+                self.save_cookies(cookies)
+            return (html, None)
         except urllib2.URLError as e: 
             return ('', e)
         except Exception as e:
+            pass
             return ('', e)
         except:
             return ('', None)

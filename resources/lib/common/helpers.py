@@ -31,9 +31,6 @@ def init():
 
 
 class Helper(Addon):
-    def build_plugin_url(self, queries):
-        return self.url + '?' + urllib.urlencode(queries)
-
     def location(self, msg):
         self.log_debug("----LOC  : " + msg)
 
