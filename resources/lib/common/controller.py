@@ -84,8 +84,7 @@ class Controller:
             links = soup.find('table', class_='listing').find_all('a')
             helper.log_debug('# of links found: %d' % len(links))
         links.reverse() # sort episodes in ascending order by default
-        quality_is_select = helper.get_setting('default-quality') == 'Select'
-        if quality_is_select:
+        if helper.get_setting('preset-quality') == 'Individually select':
             self._create_media_list(links, 'media')
         else:
             self._create_media_list(links, 'media', is_folder=False, is_playable=True)
@@ -96,52 +95,52 @@ class Controller:
     def show_media(self, params):
         helper.start('show_media')
         html = self._get_html_from_params(params)
-
-        default_quality = helper.get_setting('default-quality')
-        quality_is_select = default_quality == 'Select'
-        helper.log_debug("preset quality: %s, select_set: %s" % (default_quality, str(quality_is_select)))
+        if helper.get_setting('preset-quality') != 'Individually select':
+            self._find_and_play_media_with_preset_quality(html)
+            return
+        
         media_list = lists.GenericList()
-        url_to_play = None
         if html != '':
             soup = BeautifulSoup(html)
             encoded_links = soup.find(id='selectQuality').find_all('option')
             for option in encoded_links:
                 quality = option.string
-                link_val = urlresolver.resolve(option['value'].decode('base-64'))
-                if quality_is_select:
-                    media_list.add_dir_item(quality, {'srctype':'web', 'value':link_val, 'action':'play'}, isFolder=False, isPlayable=True)
-                else:
-                    helper.log_debug('quality: %s, default: %s' % (quality, str(default_quality)))
-                    if int(default_quality.strip('p')) >= int(quality.strip('p')):
-                        url_to_play = urlresolver.resolve(link_val)
-                        break
-
-            # Quality is pre-set, so go ahead and play the video
-            if not quality_is_select:
-                helper.location('1')
-                if len(encoded_links) == 0:
-                    helper.location('2')
-                    helper.show_error_dialog(["There doesn't seem to be any available links to play.  Please try again later.",'','If there are links on the main website, please contact the developer.'])
-                    return
-                elif url_to_play == None:
-                    helper.location('3')
-                    # The default quality is below what's available, so choose
-                    # the lowest quality one
-                    url_to_play = urlresolver.resolve(encoded_links[-1]['value'].decode('base-64'))
-                helper.location('4')
-                self.play_video({'value':url_to_play})
-
-        if quality_is_select:
-            helper.location('5')
-            media_list.end_dir()
+                link_val = option['value'].decode('base-64')
+                media_list.add_dir_item(quality, {'srctype':'web', 'value':link_val, 'action':'play'}, isFolder=False, isPlayable=True)
+        media_list.end_dir()
             
         helper.end('show_media')
         return
 
     def play_video(self, params):
         url = params['value']
-        play_item = xbmcgui.ListItem(path=url)
+        play_item = xbmcgui.ListItem(path=urlresolver.resolve(url))
         xbmcplugin.setResolvedUrl(helper.handle, True, play_item)
+
+    def _find_and_play_media_with_preset_quality(self, html):
+        helper.start('_find_and_play_media_with_preset_quality')
+        if html == '':
+            return # an error dialog should've already appeared at this point
+
+        preset_quality = int(helper.get_setting('preset-quality').strip('p'))
+        helper.log_debug("Searching for media with the preset quality: %dp" % preset_quality)
+        url_to_play = None
+        soup = BeautifulSoup(html)
+        encoded_links = soup.find(id='selectQuality').find_all('option')
+        for option in encoded_links:
+            quality = option.string
+            if preset_quality >= int(quality.strip('p')):
+                helper.log_debug('Found media to play at matching quality: %s' % quality)
+                url_to_play = option['value'].decode('base-64')
+                break
+
+        assert(len(encoded_links) > 0)
+        if url_to_play == None:
+            helper.log_debug('No matching quality found; using the lowest available')
+            url_to_play = encoded_links[-1]['value'].decode('base-64')
+        self.play_video({'value':url_to_play})
+        helper.end('_find_and_play_media_with_preset_quality')
+        return
 
     def _get_html_from_params(self, params):
         assert(params['srctype'] == 'web')
