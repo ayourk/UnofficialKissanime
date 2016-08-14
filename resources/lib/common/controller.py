@@ -70,8 +70,7 @@ class Controller:
                         next_action = 'mediaContainerList'
 
         # Ignore latest episode links for ongoing series
-        print links
-        self._create_media_list(links, 'mediaList', '(Episode).*(\?id=)', next_action)
+        self._create_media_list(links, 'mediaList', '(\?id=)', next_action)
         helper.end('show_media_container_list')
         return
 
@@ -178,11 +177,12 @@ class Controller:
         else:
             media_list = lists.GenericList()
         iter_links = links if next_action == None else links[0:-2]
+        total_items = 0 if filter != None else len(links)
         for link in iter_links:
             if filter != None and re.search(filter, link['href']) != None:
                 continue
             name = link.string.strip()
-            media_list.add_dir_item(name, {'srctype':'web', 'value':link['href'], 'action':action}, isFolder=is_folder, isPlayable=is_playable)
+            media_list.add_dir_item(name, {'srctype':'web', 'value':link['href'], 'action':action}, isFolder=is_folder, isPlayable=is_playable, total_items=total_items)
         if next_action != None:
             media_list.add_dir_item(links[-2].string, {'srctype':'web', 'value':links[-2]['href'], 'action':next_action})
             media_list.add_dir_item(links[-1].string, {'srctype':'web', 'value':links[-1]['href'], 'action':next_action})
