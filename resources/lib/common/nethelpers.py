@@ -122,11 +122,17 @@ class NetHelper(Net):
         decrypt_val = self._parseJSString(init_str)
         lines = builder.split(';')
 
-        for line in lines:
-            if len(line) > 0 and '=' in line:
-                sections = line.split('=')
-                line_val = self._parseJSString(sections[1])
-                decrypt_val = int(eval(str(decrypt_val)+sections[0][-1]+str(line_val)))
+        try:
+            for line in lines:
+                if len(line) > 0 and '=' in line:
+                    sections = line.split('=')
+                    line_val = self._parseJSString(sections[1])
+                    decrypt_val = int(eval(str(decrypt_val)+sections[0][-1]+str(line_val)))
+        except Exception as e:
+            helper.log_debug('I found the exception: %s' % str(e.read()))
+            helper.log_debug('lines: %s' % str(lines))
+            helper.log_debug('last line: %s' % str(line))
+            pass
 
         path = urlparse(url).path
         netloc = urlparse(url).netloc

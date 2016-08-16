@@ -19,6 +19,7 @@
 
 
 import re, xbmc, xbmcgui, xbmcplugin, urlresolver, xbmcaddon
+from datetime import datetime
 from resources.lib.common import lists, constants
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
@@ -26,7 +27,14 @@ from bs4 import BeautifulSoup
 
 
 # DEBUG
-import time
+import time, sys
+
+
+def youve_got_to_be_kidding(date_str, format):
+    try:
+        return datetime.strptime(date_str, format)
+    except TypeError:
+        return datetime(*(time.strptime(date_str, format)[0:6]))
 
 
 class Controller:
@@ -82,11 +90,45 @@ class Controller:
             soup = BeautifulSoup(html)
             links = soup.find('table', class_='listing').find_all('a')
             helper.log_debug('# of links found: %d' % len(links))
+            spans = soup.find_all('span', class_='info')
+            # We can determine if the media is a movie or not examining the genres
+            genres = []
+            span = [span for span in spans if span.string == 'Genres:']
+            if span != []:
+                genre_links = span[0].parent.find_all('a')
+                genres = [link.string for link in genre_links]
+                helper.log_debug('Found the genres: %s' % str(genres))
+            # We'll try to determine the episode list from the first date
+            first_air_date = ''
+            span = [span for span in spans if span.string == 'Date aired:']
+            if span != []:
+                air_date = span[0].next_sibling.encode('ascii', errors='ignore').strip().split(' to ')[0]
+                air_datetime = youve_got_to_be_kidding(air_date, '%b %d, %Y')
+                first_air_date = air_datetime.strftime('%Y-%m-%d')
+                helper.log_debug('Found the first air date: %s' % str(first_air_date))
+            # We'll try to determine the season from the alternate names, if necessary
+            aliases = []
+            span = [span for span in spans if span.string == 'Other name:']
+            if span != []:
+                alias_links = span[0].parent.find_all('a')
+                # Only keep aliases that do not contain CJK (eg, Japanese) characters
+                f = lambda c: ord(c) > 0x3000
+                aliases = [link.string for link in alias_links if filter(f, link.string) == u'']
+                helper.log_debug('Found the aliases: %s' % str(aliases))
+
         links.reverse() # sort episodes in ascending order by default
+
         if helper.get_setting('preset-quality') == 'Individually select':
-            self._create_media_list(links, 'media')
+            #self._create_media_list(links, 'media')
+            is_folder = True; is_playable = False
         else:
-            self._create_media_list(links, 'media', is_folder=False, is_playable=True)
+            #self._create_media_list(links, 'media', is_folder=False, is_playable=True)
+            is_folder=False; is_playable=True
+
+        links = [(link.string.strip(), link['href']) for link in links]
+        lists.MediaList().add_dir_items(links, params['mc_name'], params['imdb_id'], params['base_name'], params['media_type'], first_air_date, genres, aliases, is_folder, is_playable)
+        media_list = lists.MediaList()
+        media_list.end_dir()
         helper.end("show_media_list")
         return
 
