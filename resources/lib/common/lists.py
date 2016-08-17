@@ -20,11 +20,7 @@
 
 import xbmcgui, xbmcplugin, re
 from resources.lib.common.helpers import helper
-from resources.lib.common.loose_metahandlers import LooseMetaData
-#from metahandlers.thetvdbapi import TheTVDB
-
-
-meta = LooseMetaData()
+from resources.lib.common.loose_metahandlers import meta
 
 
 class BaseList(object):

@@ -19,50 +19,16 @@
 
 
 import os, xbmcvfs
-from metahandler.metahandlers import MetaData
+from metahandler.metahandlers import *
 from metahandler.TMDB import TMDB
 from metahandler.thetvdbapi import TheTVDB
 from metahandler import common
 from resources.lib.common.helpers import helper
 
 
-def make_dir(mypath, dirname):
-    ''' Creates sub-directories if they are not found. '''
-    subpath = os.path.join(mypath, dirname)
-    try:
-        if not xbmcvfs.exists(subpath): xbmcvfs.mkdirs(subpath)
-    except:
-        if not os.path.exists(subpath): os.makedirs(subpath)              
-    return subpath
-
-def bool2string(myinput):
-    ''' Neatens up usage of prepack_images flag. '''
-    if myinput is False: return 'false'
-    elif myinput is True: return 'true'
-
-'''
-   Use SQLIte3 wherever possible, needed for newer versions of XBMC
-   Keep pysqlite2 for legacy support
-'''
-try:
-    if  common.addon.get_setting('use_remote_db')=='true' and   \
-        common.addon.get_setting('db_address') is not None and  \
-        common.addon.get_setting('db_user') is not None and     \
-        common.addon.get_setting('db_pass') is not None and     \
-        common.addon.get_setting('db_name') is not None:
-        import mysql.connector as database
-        common.addon.log('Loading MySQLdb as DB engine version: %s' % database.version.VERSION_TEXT, 2)
-        DB = 'mysql'
-    else:
-        raise ValueError('MySQL not enabled or not setup correctly')
-except:
-    try: 
-        from sqlite3 import dbapi2 as database
-        common.addon.log('Loading sqlite3 as DB engine version: %s' % database.sqlite_version, 2)
-    except: 
-        from pysqlite2 import dbapi2 as database
-        common.addon.log('pysqlite2 as DB engine', 2)
-    DB = 'sqlite'
+def init():
+    meta = LooseMetaData()
+    return meta
 
 
 class LooseMetaData(MetaData):
@@ -408,3 +374,6 @@ class LooseMetaData(MetaData):
         meta['banner_url'] = show.banner_url
 
         return meta
+
+
+meta = init()

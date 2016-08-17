@@ -20,7 +20,8 @@
 
 import re, xbmc, xbmcgui, xbmcplugin, urlresolver, xbmcaddon
 from datetime import datetime
-from resources.lib.common import lists, constants
+from resources.lib.common import constants, args, lists
+from resources.lib.list_types import local_list, media_container_list
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
 from bs4 import BeautifulSoup
@@ -40,22 +41,27 @@ def youve_got_to_be_kidding(date_str, format):
 class Controller:
     def main_menu(self):
         helper.start("main_menu")
-        lists.GenericList().add_dir_items(constants.main_menu)
+        local_list.LocalList().add_directories(constants.main_menu)
         helper.end("main_menu")
         return
 
-    def show_list(self, params):
+    def show_list(self):
         helper.start("show_list")
-        assert(params['srctype'] == 'local')
-        src = constants.ui_table[params['value']]
-        lists.GenericList().add_dir_items(src)
+        src = constants.ui_table[args.value]
+        local_list.LocalList().add_directories(src)
         helper.end("show_list")
         return
 
     # A media container is a series or movie; it links to the media page, not any actual media
-    def show_media_container_list(self, params):
+    def show_media_container_list(self):
         helper.start('show_media_container_list')
-        html = self._get_html_from_params(params)
+        list = media_container_list.MediaContainerList()
+        list.parse()
+        list.add_items()
+
+
+
+        """html = self._get_html()
         links = []
         next_action = None
         if html != '':
@@ -78,13 +84,13 @@ class Controller:
                         next_action = 'mediaContainerList'
 
         # Ignore latest episode links for ongoing series
-        self._create_media_list(links, 'mediaList', '(\?id=)', next_action)
+        self._create_media_list(links, 'mediaList', '(\?id=)', next_action)"""
         helper.end('show_media_container_list')
         return
 
-    def show_media_list(self, params):
+    def show_media_list(self):
         helper.start('show_media_list')
-        html = self._get_html_from_params(params)
+        html = self._get_html()
         links = []
         if html != '':
             soup = BeautifulSoup(html)
@@ -126,16 +132,16 @@ class Controller:
             is_folder=False; is_playable=True
 
         links = [(link.string.strip(), link['href']) for link in links]
-        lists.MediaList().add_dir_items(links, params['mc_name'], params['imdb_id'], params['base_name'], params['media_type'], first_air_date, genres, aliases, is_folder, is_playable)
+        lists.MediaList().add_dir_items(links, args.full_mc_name, args.imdb_id, args.base_mc_name, args.media_type, first_air_date, genres, aliases, is_folder, is_playable)
         media_list = lists.MediaList()
         media_list.end_dir()
         helper.end("show_media_list")
         return
 
     # Can either display qualities or play videos directly depending on the settings
-    def show_media(self, params):
+    def show_media(self):
         helper.start('show_media')
-        html = self._get_html_from_params(params)
+        html = self._get_html()
         if helper.get_setting('preset-quality') != 'Individually select':
             self._find_and_play_media_with_preset_quality(html)
             return
@@ -153,10 +159,9 @@ class Controller:
         helper.end('show_media')
         return
 
-    def play_video(self, params):
-        url = params['value']
-        play_item = xbmcgui.ListItem(path=urlresolver.resolve(url))
-        xbmcplugin.setResolvedUrl(helper.handle, True, play_item)
+    def play_video(self):
+        url = urlresolver.resolve(args.value)
+        helper.resolve_url(url)
 
     def _find_and_play_media_with_preset_quality(self, html):
         helper.start('_find_and_play_media_with_preset_quality')
@@ -183,9 +188,9 @@ class Controller:
         helper.end('_find_and_play_media_with_preset_quality')
         return
 
-    def _get_html_from_params(self, params):
-        assert(params['srctype'] == 'web')
-        url_val = params['value']
+    def _get_html(self):
+        assert(args.srctype == 'web')
+        url_val = args.value
         url = url_val if constants.domain_url in url_val else (constants.domain_url + url_val)
         html,e = net.get_html(url, cookies, constants.domain_url)
         if html == '':

@@ -19,26 +19,14 @@
 
 
 from resources.lib.common.helpers import helper
-from resources.lib.common import controller
-from resources.lib.common import args
 
 
-helper.location("Default entry point")
-
-if args.action == None:
-    controller.Controller().main_menu()
-elif args.action == 'genericList':
-    controller.Controller().show_list()
-elif args.action == 'mediaContainerList':
-    controller.Controller().show_media_container_list()
-elif args.action == 'mediaList':
-    controller.Controller().show_media_list()
-elif args.action == 'media':
-    controller.Controller().show_media()
-elif args.action == 'play':
-    controller.Controller().play_video()
-else:
-    helper.log_error("WHAT HAVE YOU DONE?")
-    helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])
-
-helper.location("Default exit point")
+params = dict(helper.queries)
+action = params.get('action', None)
+srctype = params.get('srctype', None)
+value = params.get('value', None)
+fanart = params.get('fanart', None)
+full_mc_name = params.get('full_mc_name', None)
+base_mc_name = params.get('base_mc_name', None)
+imdb_id = params.get('imdb_id', None)
+media_type = params.get('media_type', None)

@@ -19,26 +19,15 @@
 
 
 from resources.lib.common.helpers import helper
-from resources.lib.common import controller
-from resources.lib.common import args
 
 
-helper.location("Default entry point")
-
-if args.action == None:
-    controller.Controller().main_menu()
-elif args.action == 'genericList':
-    controller.Controller().show_list()
-elif args.action == 'mediaContainerList':
-    controller.Controller().show_media_container_list()
-elif args.action == 'mediaList':
-    controller.Controller().show_media_list()
-elif args.action == 'media':
-    controller.Controller().show_media()
-elif args.action == 'play':
-    controller.Controller().play_video()
-else:
-    helper.log_error("WHAT HAVE YOU DONE?")
-    helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])
-
-helper.location("Default exit point")
+class LocalList(object):
+    def add_directories(self, src):
+        assert(args.srctype == None or args.srctype == 'local')
+        helper.start('LocalList.add_directories')
+        for (name, query) in src:
+            info_labels = {'title': name}
+            helper.add_directory(query, info_labels, total_items=len(src))
+        helper.end_of_directory()
+        helper.end('LocalList.add_directories')
+        return
