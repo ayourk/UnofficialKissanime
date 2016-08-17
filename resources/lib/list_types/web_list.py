@@ -18,6 +18,7 @@
 '''
 
 
+import re
 from resources.lib.common import args, constants
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
@@ -64,15 +65,26 @@ class WebList(object):
         pass
 
     def _get_art_from_metadata(self, metadata):
-        icon = metadata.get('cover_url', None)
-        fanart = metadata.get('backdrop_url', '')
+        icon = metadata.get('cover_url', args.icon)
+        fanart = metadata.get('backdrop_url', args.fanart)
         return (icon, fanart)
 
     def _construct_query(self, value, action, metadata={}, full_mc_name='', media_type=''):
-        icon = metadata.get('cover_url', None)
-        fanart = metadata.get('backdrop_url', '')
+        icon, fanart = self._get_art_from_metadata(metadata)
         base_mc_name = metadata.get('title', '')
         imdb_id = metadata.get('imdb_id', '')
-        query = {'srctype':'web', 'value':value, 'action':action, 'imdb_id':imdb_id, 'fanart':fanart,
+        query = {'srctype':'web', 'value':value, 'action':action, 'imdb_id':imdb_id, 'icon':icon, 'fanart':fanart,
                  'base_mc_name':base_mc_name, 'full_mc_name':full_mc_name, 'media_type':media_type}
         return query
+    
+    # This may belong somewhere else...
+    def _strip_by_re(self, string, filter, end, start=0):
+        return string[start:end] if re.search(filter, string) != None else string
+
+    def _clean_name(self, name, specials=True):
+        cleaned_name = name.replace(' (Sub)', '').replace(' (Dub)', '')
+        if specials:
+            cleaned_name = cleaned_name.replace (' (OVA)', '').replace (' Specials ', '')
+        cleaned_name = self._strip_by_re(cleaned_name, '( \(1080p\))$', end=-8)
+        cleaned_name = self._strip_by_re(cleaned_name, '( \((720|480|360)p\))$', end=-8)
+        return cleaned_name

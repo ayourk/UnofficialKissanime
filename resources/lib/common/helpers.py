@@ -18,7 +18,8 @@
 '''
 
 
-import sys, urllib
+import sys, time, unicodedata, xbmc, xbmcplugin
+from datetime import datetime
 from addon.common.addon import Addon
 from resources.lib.common import constants
 
@@ -39,6 +40,20 @@ class Helper(Addon):
 
     def end(self, msg):
         self.log_debug("----END  : " + msg)
+
+    # AKA youve_got_to_be_kidding_me
+    def get_datetime(self, date_str, format):
+        try:
+            return datetime.strptime(date_str, format)
+        except TypeError:
+            return datetime(*(time.strptime(date_str, format)[0:6]))
+
+    def log(self, msg, level=xbmc.LOGNOTICE):
+        msg = unicodedata.normalize('NFKD', unicode(msg)).encode('ascii', 'ignore')
+        Addon.log(self, msg, level)
+
+    def set_content(self, content_type):
+        xbmcplugin.setContent(self.handle, content_type)
 
 
 helper = init()

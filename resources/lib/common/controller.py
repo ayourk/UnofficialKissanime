@@ -21,7 +21,7 @@
 import re, xbmc, xbmcgui, xbmcplugin, urlresolver, xbmcaddon
 from datetime import datetime
 from resources.lib.common import constants, args, lists
-from resources.lib.list_types import local_list, media_container_list
+from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
 from bs4 import BeautifulSoup
@@ -52,90 +52,28 @@ class Controller:
         helper.end("show_list")
         return
 
-    # A media container is a series or movie; it links to the media page, not any actual media
+    # A media container is a series or movie; it links to the media listings 
+    # page, not any actual media.  Thus, a media container list is list of 
+    # series and/or movies
     def show_media_container_list(self):
         helper.start('show_media_container_list')
         list = media_container_list.MediaContainerList()
         list.parse()
         list.add_items()
-
-
-
-        """html = self._get_html()
-        links = []
-        next_action = None
-        if html != '':
-            soup = BeautifulSoup(html)
-            table = soup.find('table', class_='listing')
-            if table == None:
-                links = self._parse_upcoming(soup)
-            else:
-                links = table.find_all('a', {'href':re.compile('\/Anime\/')})
-                helper.log_debug('# of links found with href=/Anime/: %d' % len(links))
-                # Pagination support
-                pager_section = soup.find('ul', class_='pager')
-                if pager_section != None:
-                    page_links = pager_section.find_all('a')
-                    if "Next" in page_links[-2].string:
-                        page_links[-2].string = 'Next'
-                        page_links[-1].string = 'Last'
-                        links.append(page_links[-2])
-                        links.append(page_links[-1])
-                        next_action = 'mediaContainerList'
-
-        # Ignore latest episode links for ongoing series
-        self._create_media_list(links, 'mediaList', '(\?id=)', next_action)"""
         helper.end('show_media_container_list')
         return
 
     def show_media_list(self):
         helper.start('show_media_list')
-        html = self._get_html()
-        links = []
-        if html != '':
-            soup = BeautifulSoup(html)
-            links = soup.find('table', class_='listing').find_all('a')
-            helper.log_debug('# of links found: %d' % len(links))
-            spans = soup.find_all('span', class_='info')
-            # We can determine if the media is a movie or not examining the genres
-            genres = []
-            span = [span for span in spans if span.string == 'Genres:']
-            if span != []:
-                genre_links = span[0].parent.find_all('a')
-                genres = [link.string for link in genre_links]
-                helper.log_debug('Found the genres: %s' % str(genres))
-            # We'll try to determine the episode list from the first date
-            first_air_date = ''
-            span = [span for span in spans if span.string == 'Date aired:']
-            if span != []:
-                air_date = span[0].next_sibling.encode('ascii', errors='ignore').strip().split(' to ')[0]
-                air_datetime = youve_got_to_be_kidding(air_date, '%b %d, %Y')
-                first_air_date = air_datetime.strftime('%Y-%m-%d')
-                helper.log_debug('Found the first air date: %s' % str(first_air_date))
-            # We'll try to determine the season from the alternate names, if necessary
-            aliases = []
-            span = [span for span in spans if span.string == 'Other name:']
-            if span != []:
-                alias_links = span[0].parent.find_all('a')
-                # Only keep aliases that do not contain CJK (eg, Japanese) characters
-                f = lambda c: ord(c) > 0x3000
-                aliases = [link.string for link in alias_links if filter(f, link.string) == u'']
-                helper.log_debug('Found the aliases: %s' % str(aliases))
-
-        links.reverse() # sort episodes in ascending order by default
-
-        if helper.get_setting('preset-quality') == 'Individually select':
-            #self._create_media_list(links, 'media')
-            is_folder = True; is_playable = False
-        else:
-            #self._create_media_list(links, 'media', is_folder=False, is_playable=True)
-            is_folder=False; is_playable=True
-
-        links = [(link.string.strip(), link['href']) for link in links]
-        lists.MediaList().add_dir_items(links, args.full_mc_name, args.imdb_id, args.base_mc_name, args.media_type, first_air_date, genres, aliases, is_folder, is_playable)
-        media_list = lists.MediaList()
-        media_list.end_dir()
-        helper.end("show_media_list")
+        if args.media_type == 'tvshow':
+            list = episode_list.EpisodeList()
+            list.parse()
+            list.add_items()
+        elif args.media_type == 'movie':
+            pass # to be implemented
+        elif args.media_type == 'special':
+            pass # to be implemented
+        helper.end('show_media_list')
         return
 
     # Can either display qualities or play videos directly depending on the settings
@@ -210,42 +148,3 @@ class Controller:
             html = ''
         helper.log_debug('HTML is %sempty' % ('' if html == '' else 'not '))
         return html
-
-    def _create_media_list(self, links, action, filter=None, next_action=None, is_folder=True, is_playable=False):
-        '''
-            Helper for creating a media or media container list.  The filter 
-            parameter allows us to filter out any links while iterating, and 
-            the next_action allows for pagination for both types, if necessary.
-        '''
-        if action == 'mediaList':
-            media_list = lists.MediaContainerList()
-        elif action == 'media':
-            media_list = lists.MediaList()
-        else:
-            media_list = lists.GenericList()
-        iter_links = links if next_action == None else links[0:-2]
-        total_items = 0 if filter != None else len(links)
-        for link in iter_links:
-            if filter != None and re.search(filter, link['href']) != None:
-                continue
-            name = link.string.strip()
-            media_list.add_dir_item(name, {'srctype':'web', 'value':link['href'], 'action':action}, isFolder=is_folder, isPlayable=is_playable, total_items=total_items)
-        if next_action != None:
-            media_list.add_dir_item(links[-2].string, {'srctype':'web', 'value':links[-2]['href'], 'action':next_action})
-            media_list.add_dir_item(links[-1].string, {'srctype':'web', 'value':links[-1]['href'], 'action':next_action})
-        media_list.end_dir()
-
-    def _parse_upcoming(self, soup):
-        '''
-            The content for the upcoming page is not a table, and has spans in
-            between the name and the link, so filter those out.
-        '''
-        assert(soup.find(class_='barTitle').string.strip() == 'Upcoming anime')
-        titles = soup.find(class_='barContent').find_all(class_='title')
-        links = []
-        for title in titles:
-            name = title.string
-            link = title.parent
-            link.string = name
-            links.append(link)
-        return links

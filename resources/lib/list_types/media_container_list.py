@@ -50,6 +50,7 @@ class MediaContainerList(WebList):
         helper.end('MediaContainerList.parse')    
 
     def add_items(self):
+        helper.set_content('tvshows')
         iter_links = self.links[:-2] if self.has_next_page else self.links
         for link in iter_links:
             url = link['href']
@@ -59,6 +60,7 @@ class MediaContainerList(WebList):
             metadata, media_type = self._get_metadata(name)
             icon, fanart = self._get_art_from_metadata(metadata)
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
+            metadata['title'] = name # needed for sub and dub
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
             helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items)
 
@@ -76,7 +78,7 @@ class MediaContainerList(WebList):
         if helper.get_setting('enable-metadata') == 'false' or name == 'Next' or name == 'Last':
             return {}, ''
 
-        name_for_movie_search = self.__clean_name(name)
+        name_for_movie_search = self._clean_name(name)
         name_for_tv_search = self.__clean_tv_show_name(name_for_movie_search)
         media_type = 'tvshow'
 
@@ -113,25 +115,10 @@ class MediaContainerList(WebList):
             links.append(link)
         return links
 
-    def __strip_by_re(self, string, filter, end, start=0):
-        return string[start:end] if re.search(filter, string) != None else string
-
-    def __clean_name(self, name):
-        cleaned_name = name.replace(' (Sub)', '').replace(' (Dub)', '').replace (' (OVA)', '').replace (' Specials ', '')
-        cleaned_name = self.__strip_by_re(cleaned_name, '( \(1080p\))$', end=-8)
-        cleaned_name = self.__strip_by_re(cleaned_name, '( \((720|480|360)p\))$', end=-8)
-        #cleaned_name = cleaned_name[:-8] if re.search('( \(1080p\))$', cleaned_name) != None else cleaned_name
-        #cleaned_name = cleaned_name[:-8] if re.search('( \((720|480|360)p\))$', cleaned_name) != None else cleaned_name
-        return cleaned_name
-
     def __clean_tv_show_name(self, name):
         cleaned_name = name.replace(' (TV)', '').replace(' Second Season', '').replace(' 2nd Season', '')
-        cleaned_name = self.__strip_by_re(cleaned_name, '( Season [0-9])$', end=-9)
-        cleaned_name = self.__strip_by_re(cleaned_name, '( S[0-9])$', end=-3)
-        cleaned_name = self.__strip_by_re(cleaned_name, '( II)$', end=-3)
-        cleaned_name = self.__strip_by_re(cleaned_name, '( [0-9])$', end=-2)
-        #cleaned_name = cleaned_name[:-9] if re.search('( Season [0-9])$', cleaned_name) != None else cleaned_name
-        #cleaned_name = cleaned_name[:-3] if re.search('( S[0-9])$', cleaned_name) != None else cleaned_name
-        #cleaned_name = cleaned_name[:-2] if re.search('( [0-9])$', cleaned_name) != None else cleaned_name
-        #cleaned_name = cleaned_name[:-2] if re.search('( II)$', cleaned_name) != None else cleaned_name
+        cleaned_name = self._strip_by_re(cleaned_name, '( Season [0-9])$', end=-9)
+        cleaned_name = self._strip_by_re(cleaned_name, '( S[0-9])$', end=-3)
+        cleaned_name = self._strip_by_re(cleaned_name, '( II)$', end=-3)
+        cleaned_name = self._strip_by_re(cleaned_name, '( [0-9])$', end=-2)
         return cleaned_name

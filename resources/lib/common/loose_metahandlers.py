@@ -19,6 +19,7 @@
 
 
 import os, xbmcvfs
+from datetime import datetime
 from metahandler.metahandlers import *
 from metahandler.TMDB import TMDB
 from metahandler.thetvdbapi import TheTVDB
@@ -125,7 +126,7 @@ class LooseMetaData(MetaData):
         meta['absolute_episode'] = 0
         return meta
     
-    def get_episodes_meta(self, tvshowtitle, imdb_id, first_air_date, num_episodes):
+    def get_episodes_meta(self, tvshowtitle, imdb_id, num_episodes, first_air_date='', season=None):
         '''
         Returns all metadata about the given number of episodes (inclusive) for
         the given show, starting at the given first air date.
@@ -137,7 +138,7 @@ class LooseMetaData(MetaData):
         tvdb_id = self._get_tvdb_id(tvshowtitle, imdb_id)
 
         # Look up in cache first
-        meta_list = self._cache_lookup_episodes(imdb_id, tvdb_id, first_air_date, num_episodes)
+        meta_list = self._cache_lookup_episodes(imdb_id, tvdb_id, first_air_date, season, num_episodes)
 
         if not meta_list:
             if tvdb_id:
@@ -159,31 +160,66 @@ class LooseMetaData(MetaData):
 
             self._cache_save_episodes_meta(meta_list)
 
-            # filter out those that start before first_air_date (and have no 
-            # absolute number) and those that come after + num_episdoes
-            tmp_meta_list = []
-            for meta in meta_list:
-                if num_episodes == 0: # end of the sequence
-                    break
-                if meta['absolute_episode'] == -1:
-                    helper.log_debug('Filtering out meta %s' % str(meta))
-                    continue
-                if len(tmp_meta_list) > 0: # middle of the sequence
-                    helper.log_debug('Found next meta %s' % str(meta))
-                    tmp_meta_list.append(meta)
-                    num_episodes -= 1
-                elif meta['premiered'] == first_air_date: # start of the sequence
-                    helper.log_debug('Found first meta %s' % str(meta))
-                    tmp_meta_list.append(meta)
-                    num_episodes -= 1
-                else:
-                    helper.log_debug('Skipping meta %s' % str(meta))
-            meta_list = tmp_meta_list
+            # Filter out those that start before first_air_date/season (and 
+            # have no absolute number) and those that come after plus 
+            # num_episdoes
+            if first_air_date != '':
+                meta_list = self.__filter_meta_list_by_airdate(meta_list, first_air_date, num_episodes)
+            elif season != None:
+                meta_list = self.__filter_meta_list_by_season(meta_list, season, num_episodes)
+            else:
+                meta_list = [m for m in meta_list if m['absolute_episode'] != -1]
 
         helper.end('get_episodes_meta')
         return meta_list
 
-    def _cache_lookup_episodes(self, imdb_id, tvdb_id, first_air_date, num_episodes):
+    def __filter_meta_list_by_airdate(self, meta_list, first_air_date, num_episodes):
+        helper.log_debug('Filtering metadata list by airdate %s' % first_air_date)
+        # For some stupid reason, the tvdb may have the premiere date one-off, 
+        # maybe because it aired in Japan first or something, I don't know
+        first_date = helper.get_datetime(first_air_date, '%Y-%m-%d')
+        tmp_meta_list = []
+        for meta in meta_list:
+            if num_episodes == 0: # end of the sequence
+                break
+            if meta['absolute_episode'] == -1:
+                helper.log_debug('Filtering out meta')
+                continue
+            if len(tmp_meta_list) > 0: # middle of the sequence
+                helper.log_debug('Found next meta')
+                tmp_meta_list.append(meta)
+                num_episodes -= 1
+                continue
+            date = helper.get_datetime(meta['premiered'], '%Y-%m-%d')
+            days = abs((first_date - date).days)
+            if days <= 1: # start of the sequence
+                helper.log_debug('Found first meta')
+                tmp_meta_list.append(meta)
+                num_episodes -= 1
+            else:
+                helper.log_debug('Skipping meta %s' % str(meta))
+        return tmp_meta_list
+
+    def __filter_meta_list_by_season(self, meta_list, season, num_episodes):
+        helper.log_debug('Filtering metadata list by season %d' % season)
+        tmp_meta_list = []
+        for meta in meta_list:
+            if num_episodes == 0:
+                break
+            if len(tmp_meta_list) > 0: # in sequence
+                helper.log_debug('Found next meta')
+                tmp_meta_list.append(meta)
+                num_episodes -= 1
+            elif meta['season'] == season:
+                helper.log_debug('Found first meta')
+                tmp_meta_list.append(meta)
+                num_episodes -= 1
+            else:
+                helper.log_debug('Skipping meta')
+                pass
+        return tmp_meta_list
+
+    def _cache_lookup_episodes(self, imdb_id, tvdb_id, first_air_date, season, num_episodes):
         '''
         Lookup metadata for multiple episodes starting from the first air date
         for the given number of episodes.
