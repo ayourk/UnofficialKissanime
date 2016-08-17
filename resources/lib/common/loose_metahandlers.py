@@ -19,7 +19,7 @@
 
 
 import os, xbmcvfs
-from datetime import datetime
+from datetime import datetime, timedelta
 from metahandler.metahandlers import *
 from metahandler.TMDB import TMDB
 from metahandler.thetvdbapi import TheTVDB
@@ -224,12 +224,107 @@ class LooseMetaData(MetaData):
         Lookup metadata for multiple episodes starting from the first air date
         for the given number of episodes.
         '''
-        return []
+        helper.start('LooseMetadata._cache_lookup_episodes')
+        row = self.__cache_find_absolute_episode(tvdb_id, first_air_date, season)
+
+        # Account for TVDB's off-by-1 error for first_air_date
+        if row == None:
+            if first_air_date == '':
+                return []
+            first_date = helper.get_datetime(first_air_date, '%Y-%m-%d')
+            try1 = (first_date - timedelta(days=1)).strftime('%Y-%m-%d')
+            try2 = (first_date + timedelta(days=1)).strftime('%Y-%m-%d')
+            row = self.__cache_find_absolute_episode(tvdb_id, try1, season)
+            row2 = self.__cache_find_absolute_episode(tvdb_id, try2, season)
+            if row == None and row2 == None:
+                return []
+            elif row2 != None:
+                row = row2
+
+        first_ep = row['absolute_episode']
+        last_ep = first_ep + (num_episodes - 1) # inclusive
+
+        sql_select = ('SELECT '
+                      'episode_meta.title as title, '
+                      'episode_meta.plot as plot, '
+                      'episode_meta.director as director, '
+                      'episode_meta.writer as writer, '
+                      'tvshow_meta.genre as genre, '
+                      'tvshow_meta.duration as duration, '
+                      'episode_meta.premiered as premiered, '
+                      'tvshow_meta.studio as studio, '
+                      'tvshow_meta.mpaa as mpaa, '
+                      'tvshow_meta.title as TVShowTitle, '
+                      'episode_meta.imdb_id as imdb_id, '
+                      'episode_meta.rating as rating, '
+                      '"" as trailer_url, '
+                      'episode_meta.season as season, '
+                      'episode_meta.episode as episode, '
+                      'episode_meta.overlay as overlay, '
+                      'tvshow_meta.backdrop_url as backdrop_url, '                               
+                      'episode_meta.poster as cover_url ' 
+                      'FROM episode_meta, tvshow_meta '
+                      'WHERE episode_meta.tvdb_id = tvshow_meta.tvdb_id AND '
+                      'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ?')
+        helper.log_debug('SQL select: %s with params %s' % (sql_select, (tvdb_id, first_ep, last_ep)))
+        try:
+            self.dbcur.execute(sql_select, (tvdb_id, first_ep, last_ep))
+            matchedrows = self.dbcur.fetchall()
+        except Exception, e:
+            helper.log_debug('************* Error attempting to select from Episode table: %s ' % e)
+            return []
+
+        if matchedrows == None:
+            return []
+
+        meta_list = []
+        for row in matchedrows:
+            meta_list.append(dict(row))
+        
+        helper.end('LooseMetadata._cache_lookup_episodes success')
+        return meta_list
 
     def _cache_save_episodes_meta(self, meta_list):
         '''
         Save metadata of multiple episodes to local cache db.
         '''
+        if meta_list[0]['imdb_id']:
+            sql_select = 'SELECT * from episode_meta WHERE imdb_id = "%s"' % meta_list[0]['imdb_id']
+            sql_delete = 'DELETE * from episode_meta WHERE imdb_id = "%s"' % meta_list[0]['imdb_id']
+        elif meta_list[0]['tvdb_id']:
+            sql_select = 'SELECT * from episode_meta WHERE tvdb_id = "%s"' % meta_list[0]['tvdb_id']
+            sql_delete = 'DELETE * from episode_meta WHERE tvdb_id = "%s"' % meta_list[0]['tvdb_id']
+        else:
+            sql_select = 'SELECT * from episode_meta WHERE title = "%s"' % self._clean_string(meta_list[0]['title'].tolower())
+            sql_delete = 'DELETE * from episode_meta WHERE title = "%s"' % self._clean_string(meta_list[0]['title'].tolower())
+        helper.log_debug('Saving metadata for all episodes')
+        helper.log_debug('SQL Select: %s' % sql_select)
+
+        try:
+            self.dbcur.execute(sql_select)
+            matchedrow = self.dbcur.fetchone()
+            if matchedrow:
+                    helper.log_debug('Episode matched row found, deleting table entry')
+                    helper.log_debug('SQL Delete: %s' % sql_delete)
+                    self.dbcur.execute(sql_delete)
+        except Exception as e:
+            helper.log_debug('************* Error attempting to delete episodes from cache table: %s ' % e)
+            pass
+
+        helper.log_debug('Saving metadata information for the episodes')
+        try:
+            sql_insert = MetaData._MetaData__insert_from_dict(self, 'episode_meta', 14)
+            m_list = []
+            for m in meta_list:
+                m_list.append((m['imdb_id'], m['tvdb_id'], m['episode_id'], m['season'],
+                               m['episode'], m['title'], m['director'], m['writer'], m['plot'],
+                               m['rating'], m['premiered'], m['poster'], m['overlay'], m['absolute_episode']))
+            helper.log_debug('SQL INSERT: %s' % sql_insert)
+            self.dbcur.executemany(sql_insert, m_list)
+            self.dbcon.commit()
+        except Exception, e:
+            helper.log_debug('************* Error attempting to insert into episodes cache table: %s ' % e)
+            pass 
 
         return
 
@@ -410,6 +505,27 @@ class LooseMetaData(MetaData):
         meta['banner_url'] = show.banner_url
 
         return meta
+
+    def __cache_find_absolute_episode(self, tvdb_id, first_air_date, season):
+        sql_select = 'SELECT absolute_episode FROM episode_meta WHERE tvdb_id=? AND '
+        if first_air_date != '':
+            sql_select += 'premiered=?'
+            params = (tvdb_id, first_air_date)
+        elif season != None:
+            sql_select += 'season=? AND episode=1'
+            params = (tvdb_id, season)
+        else:
+            sql_select += 'season=1 AND episode=1'
+            params = (tvdb_id)
+
+        helper.log_debug('SQL select: %s with params %s' % (sql_select, params))
+        try:
+            self.dbcur.execute(sql_select, params)
+            matchedrow = self.dbcur.fetchone()
+        except Exception, e:
+            helper.log_debug('************* Error attempting to select from Episode table: %s ' % e)
+            return None
+        return matchedrow
 
 
 meta = init()

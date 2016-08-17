@@ -31,3 +31,5 @@ full_mc_name = params.get('full_mc_name', None)
 base_mc_name = params.get('base_mc_name', None)
 imdb_id = params.get('imdb_id', None)
 media_type = params.get('media_type', None)
+
+helper.location('Here are the params: %s' % str(params))

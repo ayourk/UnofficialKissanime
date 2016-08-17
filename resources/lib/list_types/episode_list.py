@@ -100,7 +100,7 @@ class EpisodeList(WebList):
                 # looking for metadata, but I would really rather just assume that we're
                 # looking at the first season.  Should probably do some testing to determine
                 # this (eg, log this and browse a lot to determine what's missing this filter
-                # most of the time
+                # most of the time)
                 helper.log_debug('|COUNT|LEFTOVER| %s' % args.full_mc_name)
         else:
             helper.log_debug('|COUNT|AIR| %s' % args.full_mc_name)
