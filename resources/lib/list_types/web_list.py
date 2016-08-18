@@ -85,6 +85,7 @@ class WebList(object):
         cleaned_name = name.replace(' (Sub)', '').replace(' (Dub)', '')
         if specials:
             cleaned_name = cleaned_name.replace (' (OVA)', '').replace (' Specials ', '')
+            cleaned_name = self._strip_by_re(cleaned_name, '( OVA)$', end=-4)
         cleaned_name = self._strip_by_re(cleaned_name, '( \(1080p\))$', end=-8)
         cleaned_name = self._strip_by_re(cleaned_name, '( \((720|480|360)p\))$', end=-8)
         return cleaned_name

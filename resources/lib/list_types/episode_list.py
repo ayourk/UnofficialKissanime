@@ -120,9 +120,7 @@ class EpisodeList(WebList):
 
         self.num_episodes = len(episodes)
         helper.log_debug('We have %d episodes' % self.num_episodes)
-        select_quality = helper.get_setting('preset-quality') == 'Individually select'
-        action = 'quality' if select_quality else 'play'
-        is_folder = select_quality # Display a folder if we have to select the quality
+        action, is_folder = self._get_action_and_isfolder()
         helper.set_content('episodes')
 
         all_metadata = self._get_metadata(args.base_mc_name)
@@ -132,10 +130,11 @@ class EpisodeList(WebList):
             icon, fanart = self._get_art_from_metadata(metadata)
             query = self._construct_query(url, action, metadata)
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+            metadata['title'] = '%d - %s' % ((idx + 1), metadata['title'])
             helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
 
         if len(specials) > 0:
-            icon, fanart = self.__get_art_for_season0()
+            icon, fanart = self._get_art_for_season0()
             for (name, url) in specials:
                 metadata = {'title':name}
                 query = self._construct_query(url, action, metadata)
@@ -155,6 +154,27 @@ class EpisodeList(WebList):
                                               self.first_air_date, self.season)
 
         return all_metadata
+
+    ''' PROTECTED FUNCTIONS '''
+    def _get_art_for_season0(self):
+        helper.start('_get_art_for_season0 for name %s and imdb_id %s' % (args.base_mc_name, args.imdb_id))
+        if helper.get_setting('enable-metadata') == 'false':
+            return None, ''
+
+        season_covers = meta.get_seasons(args.base_mc_name, args.imdb_id, ['0'])
+        if len(season_covers) > 0:
+            icon = season_covers[0]['cover_url']
+            fanart = season_covers[0]['backdrop_url']
+        else:
+            icon = args.icon
+            fanart = args.fanart
+        return icon, fanart
+
+    def _get_action_and_isfolder(self):
+        select_quality = helper.get_setting('preset-quality') == 'Individually select'
+        action = 'quality' if select_quality else 'play'
+        is_folder = select_quality # Display a folder if we have to select the quality
+        return action, is_folder
 
     ''' PRIVATE FUNCTIONS '''
     def __determine_season(self):
@@ -193,19 +213,6 @@ class EpisodeList(WebList):
             season = name[-1]
         return season
 
-    def __get_art_for_season0(self):
-        if helper.get_setting('enable-metadata') == 'false' or args.imdb_id == None:
-            return None, ''
-
-        season_covers = meta.get_seasons(args.base_mc_name, args.imdb_id, ['0'])
-        if len(season_covers) > 0:
-            icon = season_covers[0]['cover_url']
-            fanart = season_covers[0]['backdrop_url']
-        else:
-            icon = args.icon
-            fanart = args.fanart
-        return icon, fanart
-
     def __handle_other_media_types(self):
         # 1.1) The metadata classification may have failed earlier before because
         # of lack of data.  We can fix any potential mismatches here.
@@ -214,8 +221,9 @@ class EpisodeList(WebList):
             return True
 
         # 1.2) We have a special, let's handle just use the season 0 data along with the show banner
-        if '(OVA)' in args.full_mc_name or ' Specials' in args.full_mc_name:
+        if ('(OVA)' in args.full_mc_name or ' Specials' in args.full_mc_name or
+            re.search('( OVA)( \(((Sub)|(Dub))\))?$', args.full_mc_name) != None):
             helper.log_debug('|COUNT|OVA| %s' % args.full_mc_name)
             return True
-        
+
         return False

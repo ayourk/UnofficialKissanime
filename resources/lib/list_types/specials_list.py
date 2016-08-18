@@ -18,3 +18,29 @@
 '''
 
 
+from resources.lib.common.helpers import helper
+from resources.lib.list_types.episode_list import EpisodeList
+
+
+class SpecialsList(EpisodeList):
+    ''' PUBLIC FUNCTIONS '''
+    def add_items(self):
+        helper.start('SpecialsList.add_items')
+
+        action, is_folder = self._get_action_and_isfolder()
+        icon, fanart = self._get_art_for_season0()
+        
+        for link in self.links:
+            name = link.string.strip()
+            url = link['href']
+            metadata = self._get_metadata(name)
+            query = self._construct_query(url, action, metadata)
+            helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
+
+        helper.end_of_directory()
+        helper.end('SpecialsList.add_items')
+        return
+
+    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
+    def _get_metadata(self, name):
+        return {'title', name}

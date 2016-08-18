@@ -401,6 +401,29 @@ class LooseMetaData(MetaData):
         else:
             return meta
 
+    def _get_tvshow_backdrops(self, imdb_id, tvdb_id):
+        # Some of us aren't so lucky as to have both an imdb_id and a tvdb_id
+        if not imdb_id and not tvdb_id:
+            helper.log_debug('Cannot get tv show backdrop with neither type of id supplied')
+            return ''
+
+        sql_select = "SELECT backdrop_url FROM tvshow_meta WHERE %s=?" % ('imdb_id' if imdb_id else 'tvdb_id')
+        id = imdb_id if imdb_id else str(tvdb_id)
+
+        common.addon.log('SQL Select: %s params: %s' % (sql_select, id), 0)
+        try:
+            self.dbcur.execute(sql_select, (id,))
+            matchedrow = self.dbcur.fetchone()
+        except Exception as e:
+            common.addon.log('************* Error attempting to select from tvshow_meta table: %s ' % e, 4)
+            pass
+            return ''
+                    
+        if matchedrow:
+            return dict(matchedrow)['backdrop_url']
+        else:
+            return ''
+
     def _show_to_meta(self, show, imdb_id, tvdb_id, show_name, year):
         meta = self._init_tvshow_meta(imdb_id, tvdb_id, show_name, year)
         meta['imdb_id'] = imdb_id

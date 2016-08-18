@@ -116,22 +116,25 @@ class NetHelper(Net):
             plugin.video.genesis\resources\lib\libraries\cloudflare.py        
         '''
         helper.start("_get_cloudflare_answer")
-        jschl = re.compile('name="jschl_vc" value="(.+?)"/>').findall(challenge)[0]
-        init_str = re.compile('setTimeout\(function\(\){\s*.*?.*:(.*?)};').findall(challenge)[0]
-        builder = re.compile(r"challenge-form\'\);\s*(.*)a.v").findall(challenge)[0]
-        decrypt_val = self._parseJSString(init_str)
-        lines = builder.split(';')
+        try:
+            jschl = re.compile('name="jschl_vc" value="(.+?)"/>').findall(challenge)[0]
+            init_str = re.compile('setTimeout\(function\(\){\s*.*?.*:(.*?)};').findall(challenge)[0]
+            builder = re.compile(r"challenge-form\'\);\s*(.*)a.v").findall(challenge)[0]
+            decrypt_val = self._parseJSString(init_str)
+            lines = builder.split(';')
+        except Exception as e:
+            helper.log_debug('Failed to parse the challenge %s' % str(challenge))
+            lines = []
+            pass
 
         try:
             for line in lines:
                 if len(line) > 0 and '=' in line:
                     sections = line.split('=')
                     line_val = self._parseJSString(sections[1])
-                    decrypt_val = int(eval(str(decrypt_val)+sections[0][-1]+str(line_val)))
+                    decrypt_val = int(eval(str(decrypt_val) + sections[0][-1] + str(line_val)))
         except Exception as e:
-            helper.log_debug('I found the exception: %s' % str(e.read()))
-            helper.log_debug('lines: %s' % str(lines))
-            helper.log_debug('last line: %s' % str(line))
+            helper.log_debug('Failed to find the decrypt_val from the linese')
             pass
 
         path = urlparse(url).path
@@ -162,7 +165,8 @@ class NetHelper(Net):
             offset=1 if s[0] == '+' else 0
             val = int(eval(s.replace('!+[]','1').replace('!![]','1').replace('[]','0').replace('(','str(')[offset:]))
             return val
-        except:
+        except Exception as e:
+            helper.log_debug('_parseJSString failed with exception %s' % str(e))
             pass
 
     def _update_opener_with_cloudflare(self):

@@ -64,6 +64,9 @@ class MediaContainerList(WebList):
         for (name, url) in mc_links:
             metadata, media_type = self._get_metadata(name)
             icon, fanart = self._get_art_from_metadata(metadata)
+            if media_type == 'tvshow' and ('(OVA)' in name or ' Specials' in name or
+                                           re.search('( OVA)( \(((Sub)|(Dub))\))?$', name)):
+                media_type = 'special'
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
             metadata['title'] = name # needed for sub and dub
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]

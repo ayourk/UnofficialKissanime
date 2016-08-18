@@ -21,7 +21,7 @@
 import re, xbmc, xbmcgui, xbmcplugin, urlresolver, xbmcaddon
 from datetime import datetime
 from resources.lib.common import constants, args, lists
-from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing
+from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
 from bs4 import BeautifulSoup
@@ -72,6 +72,9 @@ class Controller:
         elif args.media_type == 'movie':
             pass # to be implemented
         elif args.media_type == 'special':
+            list = specials_list.SpecialsList()
+            list.parse()
+            list.add_items()
             pass # to be implemented
         helper.end('show_media_list')
         return
