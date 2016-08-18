@@ -141,6 +141,7 @@ class EpisodeList(WebList):
                 query = self._construct_query(url, action, metadata)
                 helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
 
+        helper.add_sort_methods(['episode', 'title'])
         helper.end_of_directory()
         helper.end('EpisodeList.add_items')
         return

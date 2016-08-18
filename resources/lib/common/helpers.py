@@ -62,7 +62,8 @@ class Helper(Addon):
 
     def add_sort_methods(self, sort_methods):
         for m in sort_methods:
-            xbmcplugin.addSortMethod(self.handle, self.sort_method_dict[m])
+            if self.sort_method_dict.has_key(m):
+                xbmcplugin.addSortMethod(self.handle, self.sort_method_dict[m])
 
 
 helper = init()
