@@ -52,17 +52,22 @@ class MediaContainerList(WebList):
     def add_items(self):
         helper.set_content('tvshows')
         iter_links = self.links[:-2] if self.has_next_page else self.links
+
+        # Filter out the episode links for ongoing series
+        mc_links = []
         for link in iter_links:
             url = link['href']
             if re.search('(\?id=)', url) != None:
                 continue
-            name = link.string.strip()
+            mc_links.append((link.string.strip(), url))
+
+        for (name, url) in mc_links:
             metadata, media_type = self._get_metadata(name)
             icon, fanart = self._get_art_from_metadata(metadata)
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
             metadata['title'] = name # needed for sub and dub
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
-            helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items)
+            helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items, total_items=len(mc_links))
 
         if self.has_next_page:
             query = self._construct_query(self.links[-2]['href'], 'mediaContainerList')
