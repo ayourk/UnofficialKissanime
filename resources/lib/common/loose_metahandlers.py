@@ -402,7 +402,7 @@ class LooseMetaData(MetaData):
             return meta
 
     def _show_to_meta(self, show, imdb_id, tvdb_id, show_name, year):
-        meta = {}
+        meta = self._init_tvshow_meta(imdb_id, tvdb_id, show_name, year)
         meta['imdb_id'] = imdb_id
         meta['tvdb_id'] = tvdb_id
         meta['title'] = show_name

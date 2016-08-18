@@ -142,7 +142,6 @@ class EpisodeList(WebList):
                 helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
 
         helper.end_of_directory()
-
         helper.end('EpisodeList.add_items')
         return
 

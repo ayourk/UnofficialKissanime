@@ -55,5 +55,14 @@ class Helper(Addon):
     def set_content(self, content_type):
         xbmcplugin.setContent(self.handle, content_type)
 
+    sort_method_dict = {
+        'episode' : xbmcplugin.SORT_METHOD_EPISODE,
+        'title' : xbmcplugin.SORT_METHOD_TITLE
+    }
+
+    def add_sort_methods(self, sort_methods):
+        for m in sort_methods:
+            xbmcplugin.addSortMethod(self.handle, self.sort_method_dict[m])
+
 
 helper = init()
