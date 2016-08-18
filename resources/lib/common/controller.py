@@ -135,18 +135,21 @@ class Controller:
         url = url_val if constants.domain_url in url_val else (constants.domain_url + url_val)
         html,e = net.get_html(url, cookies, constants.domain_url)
         if html == '':
-            helper.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
-            helper.show_error_dialog([
-                'Failed to parse the KissAnime website.',
-                'Please see the error below.  If it has to do with HTTP exception 503, KissAnime may be down; in that case, try again later.',
-                ('Error details: %s' % str(e))
-                ])
-        elif html == 'The service is unavailable.':
-            helper.log_debug('The service is unavailable.')
-            helper.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
-            html = ''
+            if e.read() == 'The service is unavailable.':
+                helper.log_debug('The service is unavailable.')
+                helper.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
+            elif e.read() == "You're browsing too fast! Please slow down.":
+                helper.log_debug('Got the browsing too fast error 1.')
+                helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
+            else:
+                helper.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
+                helper.show_error_dialog([
+                    'Failed to parse the KissAnime website.',
+                    'Please see the error below.  If it has to do with HTTP exception 503, KissAnime may be down; in that case, try again later.',
+                    ('Error details: %s' % str(e))
+                    ])
         elif html == "You're browsing too fast! Please slow down.":
-            helper.log_debug('Got the browsing too fast error.')
+            helper.log_debug('Got the browsing too fast error 2.')
             helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
             html = ''
         helper.log_debug('HTML is %sempty' % ('' if html == '' else 'not '))

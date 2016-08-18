@@ -43,4 +43,4 @@ class SpecialsList(EpisodeList):
 
     ''' OVERRIDDEN PROTECTED FUNCTIONS '''
     def _get_metadata(self, name):
-        return {'title', name}
+        return {'title' : name}

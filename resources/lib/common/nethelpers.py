@@ -70,6 +70,9 @@ class NetHelper(Net):
                 return r
             except urllib2.HTTPError as e:
                 if e.code == 503:
+                    challenge = e.read()
+                    if challenge == 'The service is unavailable.':
+                        raise
                     try:
                         helper.log_debug("Received a challenge, so we'll need to get around cloudflare")
                         self._resolve_cloudflare(url, e.read(), form_data, headers, compression)
@@ -106,6 +109,7 @@ class NetHelper(Net):
             helper.log_debug("Failed to resolve the cloudflare challenge with exception %s" % str(e))
             self._update_opener()
             pass
+        helper.end('_resolve_cloudflare')
     
     def _get_cloudflare_answer(self, url, challenge, form_data={}, headers={}, compression=True):
         '''

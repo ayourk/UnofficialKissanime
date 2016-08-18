@@ -44,7 +44,12 @@ class LooseMetaData(MetaData):
         
         # TMDB constants
         self.tmdb_image_url = ''
-        self.tmdb_api_key = tmdb_api_key
+        try:
+            from resources.lib.common import api
+            self.tmdb_api_key = api.tmdb_key
+        except:
+            self.tmdb_api_key = tmdb_api_key
+            pass
 
         self.path = helper.get_profile()
         self.cache_path = make_dir(self.path, 'meta_cache')
@@ -306,7 +311,7 @@ class LooseMetaData(MetaData):
         try:
             if imdb_id:
                 tvdb_id = tvdb.get_show_by_imdb(imdb_id)
-                helper.log_debug('Got tvdb_id %s from imdb_id %s' % (tvdb_id, imdb_id))
+                helper.log_debug('Attempt to get show from imdb_id %s gave us tvdb_id %s.' % (imdb_id, tvdb_id))
         except Exception, e:
             common.addon.log('************* Error retreiving from thetvdb.com: %s ' % e, 4)
             tvdb_id = ''
@@ -357,7 +362,12 @@ class LooseMetaData(MetaData):
             tmdb = TMDB(api_key=self.tmdb_api_key, lang=self._MetaData__get_tmdb_language())
             imdb_meta = tmdb.search_imdb(name)
             if imdb_meta and 'tt' in imdb_meta.get('imdbID', ''):
-                imdb_id = imdb_meta.get('imdbID')
+                media_type = imdb_meta.get('Type', '')
+                if media_type == 'series':
+                    imdb_id = imdb_meta.get('imdbID')
+                elif media_type == 'episode' and imdb_meta.get('seriesID', '') != '':
+                    imdb_id = imdb_meta.get('seriesID')
+            if imdb_id != '':
                 helper.log_debug('Found metadata from IMDB with id %s! Restarting _get_tvdb_meta' % imdb_id)
                 return self._get_tvdb_meta(imdb_id, name, year)
 
@@ -426,7 +436,7 @@ class LooseMetaData(MetaData):
 
     def _show_to_meta(self, show, imdb_id, tvdb_id, show_name, year):
         meta = self._init_tvshow_meta(imdb_id, tvdb_id, show_name, year)
-        meta['imdb_id'] = imdb_id
+        meta['imdb_id'] = imdb_id if imdb_id != None else ''
         meta['tvdb_id'] = tvdb_id
         meta['title'] = show_name
         if str(show.rating) != '' and show.rating != None:
