@@ -25,6 +25,10 @@ from resources.lib.list_types.web_list import WebList
 from bs4 import BeautifulSoup
 
 class MediaContainerList(WebList):
+    def __init__(self):
+        WebList.__init__(self)
+        self.has_next_page = False
+
     ''' PUBLIC FUNCTIONS '''
     def parse(self):
         helper.start('MediaContainerList.parse')
@@ -64,8 +68,9 @@ class MediaContainerList(WebList):
         for (name, url) in mc_links:
             metadata, media_type = self._get_metadata(name)
             icon, fanart = self._get_art_from_metadata(metadata)
-            if media_type == 'tvshow' and ('(OVA)' in name or ' Specials' in name or
-                                           re.search('( OVA)( \(((Sub)|(Dub))\))?$', name)):
+            if media_type == 'tvshow' and (' (OVA)' in name or ' Specials' in name or
+                                           re.search('( OVA)( \(((Sub)|(Dub))\))?$', name) != None or 
+                                           re.search(' (Special)$', name) != None):
                 media_type = 'special'
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
             metadata['title'] = name # needed for sub and dub

@@ -23,6 +23,20 @@ from resources.lib.list_types.episode_list import EpisodeList
 
 
 class SpecialsList(EpisodeList):
+    def __init__(self, episode_list=None):
+        if not episode_list:
+            EpisodeList.__init__(self)
+        else:
+            self.html = episode_list.html
+            self.soup = episode_list.soup
+            self.links = episode_list.links
+            self.genres = episode_list.genres
+            self.aliases = episode_list.aliases
+            self.first_air_date = episode_list.first_air_date
+            self.season = episode_list.season
+            self.num_episodes = episode_list.num_episodes
+
+
     ''' PUBLIC FUNCTIONS '''
     def add_items(self):
         helper.start('SpecialsList.add_items')

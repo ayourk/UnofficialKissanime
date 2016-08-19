@@ -68,14 +68,20 @@ class Controller:
         if args.media_type == 'tvshow':
             list = episode_list.EpisodeList()
             list.parse()
+            actual_media_type = list.get_actual_media_type()
+            if actual_media_type == 'special':
+                list = specials_list.SpecialsList(list)
+            elif actual_media_type == 'movie':
+                list = movie_listing.MovieListing(list)
             list.add_items()
         elif args.media_type == 'movie':
-            pass # to be implemented
+            list = movie_listing.MovieListing()
+            list.parse()
+            list.add_items()
         elif args.media_type == 'special':
             list = specials_list.SpecialsList()
             list.parse()
             list.add_items()
-            pass # to be implemented
         helper.end('show_media_list')
         return
 

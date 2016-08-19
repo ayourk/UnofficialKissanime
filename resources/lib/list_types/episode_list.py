@@ -75,18 +75,30 @@ class EpisodeList(WebList):
 
         helper.end('EpisodeList.parse')
         return
+    
+    def get_actual_media_type(self):
+        # 1.1) The metadata classification may have failed earlier before because
+        # of lack of data.  We can fix any potential mismatches here.
+        if 'Movie' in self.genres:
+            helper.log_debug('|COUNT|MISMATCH| %s' % args.full_mc_name)
+            return 'movie'
+
+        # 1.2) We have a special, let's handle just use the season 0 data along with the show banner
+        if ('(OVA)' in args.full_mc_name or ' Specials' in args.full_mc_name or
+            re.search('( OVA)( \(((Sub)|(Dub))\))?$', args.full_mc_name) != None or
+            re.search(' (Special)$', args.full_mc_name) != None):
+            helper.log_debug('|COUNT|OVA| %s' % args.full_mc_name)
+            return 'special'
+
+        return 'tvshow'
 
     def add_items(self):
         helper.start('EpisodeList.add_items')
-        # We now have a list of episodes in links, and we need to figure out 
+        # We now have a list of episodes in links, and we need to figure out
         # which season those episodes belong to, as well as filter out stray
-        # specials/OVAs.  I have a numbered FSM for this.
+        # specials/OVAs.  I have a numbered FSM for this.  The caller should
+        # invoke get_actual_media_type before this function to get the first state.
         
-        # 1) The media type may have been wrong, so re-route this if that's 
-        # the case
-        if self.__handle_other_media_types():
-            return
-
         # 2) Otherwise, we have a tv show.  The most reliable way to figure out 
         # what data to use is to use the first air date with the number of 
         # episodes.
@@ -96,11 +108,9 @@ class EpisodeList(WebList):
             # determine which season this is based on the data we scraped
             self.season = self.__determine_season()
             if self.season == None:
-                # I'm really not sure what the next best step is.  It's probably to stop
-                # looking for metadata, but I would really rather just assume that we're
-                # looking at the first season.  Should probably do some testing to determine
-                # this (eg, log this and browse a lot to determine what's missing this filter
-                # most of the time)
+                # I'm not sure what the next best step is here, but I have to
+                # assume it's the first season to catch a lot of actual first 
+                # seasons...
                 helper.log_debug('|COUNT|LEFTOVER| %s' % args.full_mc_name)
         else:
             helper.log_debug('|COUNT|AIR| %s' % args.full_mc_name)
@@ -212,18 +222,3 @@ class EpisodeList(WebList):
         elif re.search('( [0-9])$', name):
             season = name[-1]
         return season
-
-    def __handle_other_media_types(self):
-        # 1.1) The metadata classification may have failed earlier before because
-        # of lack of data.  We can fix any potential mismatches here.
-        if 'Movie' in self.genres:
-            helper.log_debug('|COUNT|MISMATCH| %s' % args.full_mc_name)
-            return True
-
-        # 1.2) We have a special, let's handle just use the season 0 data along with the show banner
-        if ('(OVA)' in args.full_mc_name or ' Specials' in args.full_mc_name or
-            re.search('( OVA)( \(((Sub)|(Dub))\))?$', args.full_mc_name) != None):
-            helper.log_debug('|COUNT|OVA| %s' % args.full_mc_name)
-            return True
-
-        return False

@@ -18,10 +18,45 @@
 '''
 
 
+'''
+    Ugh.  The following 3 lines are a result of me being extra lazy.  What I am
+    doing here is called "monkey-patching" an entire class in another module
+    (!!).
+
+    http://stackoverflow.com/questions/3765222/monkey-patch-python-class
+
+    At the end of the day, the TMDB class had comparisons that screwed over 
+    anime titles (eg, preferring the first result over Japanese results, and 
+    there is no way to filter based on original language).  These included 
+    __clean_name and tmdb_lookup.
+
+    My options, as I understood the problem, were the following:
+    - I tried replacing the class in this file (ie, TMDB = AnimeTMDB), but that
+      would only replace the local occurences of TMDB(), not the ones in 
+      metahandler, just like the first option.
+    - Define the functions in their entirety at the top level and patch them in
+      at the class level, eg TMDB.tmdb_lookup = my_tmdb_lookup.  The downside
+      to this approach is that I had to copy the entire freaking function.
+      However, this would only replace the local occurences of TMDB.  To get
+      everything, I would need to override all functions that create instances
+      of TMDB and replace those instances with AnimeTMDB instances.
+    - Modify the metahandler module code directly.  I didn't want to do this
+      for obvious reasons.
+    - Monkey-patch the class within the metahandler object itself. Although
+      nasty, the replacement class AnimeTMDB could inherit from TMDB, so it
+      could use any of the parent's methods, resulting in potentially a lot 
+      less code.
+
+    I ended up choosing the 4th option.
+'''
+import metahandler
+from resources.lib.common.anime_TMDB import AnimeTMDB
+metahandler.TMDB.TMDB = AnimeTMDB
+
+
 import os, xbmcvfs
 from datetime import datetime, timedelta
 from metahandler.metahandlers import *
-from metahandler.TMDB import TMDB
 from metahandler.thetvdbapi import TheTVDB
 from metahandler import common
 from resources.lib.common.helpers import helper
@@ -115,6 +150,8 @@ class LooseMetaData(MetaData):
                 helper.log_debug('Failed to alter the table')
         else:
             helper.log_debug('The absolute_episode column already exists')
+
+        common.addon.log = helper.log
 
     def get_episodes_meta(self, tvshowtitle, imdb_id, num_episodes, first_air_date='', season=None):
         '''
