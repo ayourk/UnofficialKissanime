@@ -86,7 +86,7 @@ class Controller:
 
     def search(self):
         helper.start('search')
-        search_string = keyboard.Keyboard().get_input('Search for title: ')
+        search_string = helper.get_user_input('Search for show title')
         if search_string:
             search_string = constants.domain_url + 'Search/Anime?' + urllib.urlencode({'keyword':search_string})
             self._show_list(media_container_list.MediaContainerList(search_string))
