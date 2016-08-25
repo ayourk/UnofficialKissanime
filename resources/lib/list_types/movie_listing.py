@@ -18,11 +18,14 @@
 '''
 
 
+from resources.lib.common.helpers import helper
+from resources.lib.common import args
+from resources.lib.common.loose_metahandlers import meta
 from resources.lib.list_types.episode_list import EpisodeList
 
 
 class MovieListing(EpisodeList):
-    def __init__(self, episode_list=None):
+    def __init__(self, episode_list=None, mismatch=False):
         if not episode_list:
             EpisodeList.__init__(self)
         else:
@@ -34,6 +37,39 @@ class MovieListing(EpisodeList):
             self.first_air_date = episode_list.first_air_date
             self.season = episode_list.season
             self.num_episodes = episode_list.num_episodes
+            self.mismatch = mismatch
         
     def add_items(self):
+        helper.start('MovieListing.add_items')
+
+        action, is_folder = self._get_action_and_isfolder()
+
+        for link in self.links:
+            name = link.string.strip()
+            url = link['href']
+            metadata = self._get_metadata(args.base_mc_name)
+            query = self._construct_query(url, action, metadata)
+            helper.add_directory(query, metadata, img=args.icon, fanart=args.fanart, is_folder=is_folder)
+
+        helper.end_of_directory()
+        helper.end('MovieListing.add_items')
         return
+
+    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
+    def _get_metadata(self, name):
+        if helper.get_setting('enable-metadata') == 'false':
+            return {}
+
+        # If we have no previous metadata, and this isn't a mismatch, then
+        # we've already had a legitimate try with no luck.
+        if not self.mismatch and (args.imdb_id == None and args.tmdb_id == None):
+            helper.log_debug('1')
+            return {}
+        
+        imdb_id = args.imdb_id if args.imdb_id and not self.mismatch else ''
+        tmdb_id = args.tmdb_id if args.tmdb_id and not self.mismatch else ''
+        should_update = self.mismatch
+        metadata = meta.get_meta('movie', name, imdb_id, tmdb_id, update=should_update)
+        # Update the tvshow cache to nothing for this name 
+        helper.log_debug('2: %s' % str(meta))
+        return metadata

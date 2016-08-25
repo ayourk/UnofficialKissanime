@@ -157,10 +157,11 @@ class EpisodeList(WebList):
 
     ''' OVERRIDDEN PROTECTED FUNCTIONS '''
     def _get_metadata(self, name):
-        if helper.get_setting('enable-metadata') == 'false' or args.imdb_id == None:
+        if (helper.get_setting('enable-metadata') == 'false' or 
+            (args.imdb_id == None and args.tvdb_id == None)):
             return []
         
-        all_metadata = meta.get_episodes_meta(name, args.imdb_id, self.num_episodes,
+        all_metadata = meta.get_episodes_meta(name, args.imdb_id, args.tvdb_id, self.num_episodes,
                                               self.first_air_date, self.season)
 
         return all_metadata

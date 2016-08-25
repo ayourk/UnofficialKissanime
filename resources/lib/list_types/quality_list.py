@@ -18,3 +18,22 @@
 '''
 
 
+from resources.lib.list_types.web_list import WebList
+from resources.lib.common.helpers import helper
+
+
+class QualityList(WebList):
+    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
+    def parse(self):
+        if self.soup == None:
+            return
+
+        self.links = self.soup.find(id='selectQuality').find_all('option')
+
+    def add_items(self):
+        for option in self.links:
+            quality = option.string
+            link_val = option['value'].decode('base-64')
+            query = self._construct_query(link_val, 'play')
+            helper.add_video_item(query, {'title':quality}, total_items=len(self.links))
+        helper.end_of_directory()

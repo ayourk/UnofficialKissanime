@@ -72,10 +72,11 @@ class NetHelper(Net):
                 if e.code == 503:
                     challenge = e.read()
                     if challenge == 'The service is unavailable.':
+                        helper.log_debug('Challenge says the service is unavailable')
                         raise
                     try:
                         helper.log_debug("Received a challenge, so we'll need to get around cloudflare")
-                        self._resolve_cloudflare(url, e.read(), form_data, headers, compression)
+                        self._resolve_cloudflare(url, challenge, form_data, headers, compression)
                         helper.log_debug("Successfully resolved cloudflare challenge, fetching real response")
                         return Net._fetch(self, url, form_data, headers, compression)
                     except urllib2.HTTPError as e:
@@ -120,6 +121,10 @@ class NetHelper(Net):
             plugin.video.genesis\resources\lib\libraries\cloudflare.py        
         '''
         helper.start("_get_cloudflare_answer")
+        if not challenge:
+            helper.log_debug('Challenge is empty, re')
+            raise ValueError('Challenge is empty')
+
         try:
             jschl = re.compile('name="jschl_vc" value="(.+?)"/>').findall(challenge)[0]
             init_str = re.compile('setTimeout\(function\(\){\s*.*?.*:(.*?)};').findall(challenge)[0]
@@ -129,7 +134,7 @@ class NetHelper(Net):
         except Exception as e:
             helper.log_debug('Failed to parse the challenge %s' % str(challenge))
             lines = []
-            pass
+            raise
 
         try:
             for line in lines:
@@ -138,8 +143,8 @@ class NetHelper(Net):
                     line_val = self._parseJSString(sections[1])
                     decrypt_val = int(eval(str(decrypt_val) + sections[0][-1] + str(line_val)))
         except Exception as e:
-            helper.log_debug('Failed to find the decrypt_val from the linese')
-            pass
+            helper.log_debug('Failed to find the decrypt_val from the lines')
+            raise
 
         path = urlparse(url).path
         netloc = urlparse(url).netloc

@@ -153,16 +153,22 @@ class LooseMetaData(MetaData):
 
         common.addon.log = helper.log
 
-    def get_episodes_meta(self, tvshowtitle, imdb_id, num_episodes, first_air_date='', season=None):
+    def get_episodes_meta(self, tvshowtitle, imdb_id, tvdb_id, num_episodes, first_air_date='', season=None):
         '''
         Returns all metadata about the given number of episodes (inclusive) for
         the given show, starting at the given first air date.
+
+        At least one of tvdb_id and imdb_id must be given.
         '''
         helper.start('get_episodes_meta')
-        if imdb_id:
-            imdb_id = self._valid_imdb_id(imdb_id)
+        if not imdb_id and not tvdb_id:
+            helper.log_debug('Invalid imdb_id and tvdb_id')
+            return []
 
-        tvdb_id = self._get_tvdb_id(tvshowtitle, imdb_id)
+        imdb_id = self._valid_imdb_id(imdb_id) if imdb_id else ''
+
+        if not tvdb_id:
+            tvdb_id = self._get_tvdb_id(tvshowtitle, imdb_id)
 
         # Look up in cache first
         meta_list = self._cache_lookup_episodes(imdb_id, tvdb_id, first_air_date, season, num_episodes)
@@ -398,6 +404,8 @@ class LooseMetaData(MetaData):
         if tvdb_id == '' and imdb_id == '':
             tmdb = TMDB(api_key=self.tmdb_api_key, lang=self._MetaData__get_tmdb_language())
             imdb_meta = tmdb.search_imdb(name)
+            helper.log_debug('Found IMDB result with metadata %s' % str(imdb_meta))
+            helper.log_debug('imdbID: %s | %s|' % (imdb_meta.get('imdbID', ''), str('tt' in imdb_meta.get('imdbID', ''))))
             if imdb_meta and 'tt' in imdb_meta.get('imdbID', ''):
                 media_type = imdb_meta.get('Type', '')
                 if media_type == 'series':

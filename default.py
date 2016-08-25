@@ -33,6 +33,8 @@ elif args.action == 'mediaContainerList':
     controller.Controller().show_media_container_list()
 elif args.action == 'mediaList':
     controller.Controller().show_media_list()
+elif args.action == 'quality':
+    controller.Controller().show_quality()
 elif args.action == 'media':
     controller.Controller().show_media()
 elif args.action == 'play':

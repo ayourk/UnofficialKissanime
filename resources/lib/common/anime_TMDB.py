@@ -32,20 +32,28 @@ class AnimeTMDB(TMDB):
             meta = self._search_movie(name,'')
         if meta and meta['total_results'] != 0 and meta['results']:
             # Try to find a Japanese result if possible, since this is anime-oriented
-            prob_result = meta['results'][0]
+            japanese_result = None
             for result in meta['results']:
                 orig_lang = result.get('original_language', '')
                 if orig_lang == 'ja':
-                    prob_result = result
+                    japanese_result = result
                     break
-            tmdb_id = prob_result['id']
-            imdb_id = prob_result.get('imdb_id', imdb_id)
+
+            # GUESS
+            # Prefer the Japanese result if the name is a straight match, or if the 
+            # first result doesn't match the name
+            best_guess = meta['results'][0]
+            if (japanese_result != None and 
+                (japanese_result['title'] == name or best_guess['title'] != name)):
+                best_guess = japanese_result
+            tmdb_id = best_guess['id']
+            imdb_id = best_guess.get('imdb_id', imdb_id)
 
         return TMDB.tmdb_lookup(self, name, imdb_id, tmdb_id, year)
 
     def search_imdb(self, name, imdb_id='', year=''):
         name = self._TMDB__clean_name(name)
-        TMDB.search_imdb(self, name, imdb_id, year)
+        return TMDB.search_imdb(self, name, imdb_id, year)
 
     def _TMDB__clean_name(self, mystring):
         newstring = ''

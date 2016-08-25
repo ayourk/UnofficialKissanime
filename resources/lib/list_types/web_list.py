@@ -37,10 +37,10 @@ class WebList(object):
         url = url_val if constants.domain_url in url_val else (constants.domain_url + url_val)
         self.html, e = net.get_html(url, cookies, constants.domain_url)
         if self.html == '':
-            if e.read() == 'The service is unavailable.':
+            if e.message == 'The service is unavailable.':
                 helper.log_debug('The service is unavailable.')
                 helper.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
-            elif e.read() == "You're browsing too fast! Please slow down.":
+            elif e.message == "You're browsing too fast! Please slow down.":
                 helper.log_debug('Got the browsing too fast error 1.')
                 helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
             else:
@@ -76,7 +76,10 @@ class WebList(object):
         icon, fanart = self._get_art_from_metadata(metadata)
         base_mc_name = metadata.get('title', '')
         imdb_id = metadata.get('imdb_id', '')
-        query = {'srctype':'web', 'value':value, 'action':action, 'imdb_id':imdb_id, 'icon':icon, 'fanart':fanart,
+        tvdb_id = metadata.get('tvdb_id', '')
+        tmdb_id = metadata.get('tmdb_id', '')
+        query = {'srctype':'web', 'value':value, 'action':action, 'imdb_id':imdb_id, 
+                 'tvdb_id':tvdb_id, 'tmdb_id':tmdb_id, 'icon':icon, 'fanart':fanart,
                  'base_mc_name':base_mc_name, 'full_mc_name':full_mc_name, 'media_type':media_type}
         return query
     

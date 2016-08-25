@@ -21,7 +21,7 @@
 import re, xbmc, xbmcgui, xbmcplugin, urlresolver, xbmcaddon
 from datetime import datetime
 from resources.lib.common import constants, args, lists
-from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list
+from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
 from bs4 import BeautifulSoup
@@ -72,7 +72,7 @@ class Controller:
             if actual_media_type == 'special':
                 list = specials_list.SpecialsList(list)
             elif actual_media_type == 'movie':
-                list = movie_listing.MovieListing(list)
+                list = movie_listing.MovieListing(list, mismatch=True)
             list.add_items()
         elif args.media_type == 'movie':
             list = movie_listing.MovieListing()
@@ -83,6 +83,12 @@ class Controller:
             list.parse()
             list.add_items()
         helper.end('show_media_list')
+        return
+
+    def show_quality(self):
+        list = quality_list.QualityList()
+        list.parse()
+        list.add_items()
         return
 
     # Can either display qualities or play videos directly depending on the settings

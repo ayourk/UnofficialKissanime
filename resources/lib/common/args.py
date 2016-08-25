@@ -30,6 +30,8 @@ fanart = params.get('fanart', None)
 full_mc_name = params.get('full_mc_name', None)
 base_mc_name = params.get('base_mc_name', None)
 imdb_id = params.get('imdb_id', None)
+tvdb_id = params.get('tvdb_id', None)
+tmdb_id = params.get('tmdb_id', None)
 media_type = params.get('media_type', None)
 
 helper.location('Here are the params: %s' % str(params))

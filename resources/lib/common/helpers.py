@@ -43,6 +43,8 @@ class Helper(Addon):
 
     # AKA youve_got_to_be_kidding_me
     def get_datetime(self, date_str, format):
+        if len(date_str) == 4:
+            format = '%Y'
         try:
             return datetime.strptime(date_str, format)
         except TypeError:
