@@ -19,14 +19,15 @@
 
 
 import re
+from resources.lib.common import args
 from resources.lib.common.helpers import helper
 from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.web_list import WebList
 from bs4 import BeautifulSoup
 
 class MediaContainerList(WebList):
-    def __init__(self):
-        WebList.__init__(self)
+    def __init__(self, url_val=args.value):
+        WebList.__init__(self, url_val)
         self.has_next_page = False
 
     ''' PUBLIC FUNCTIONS '''
@@ -37,7 +38,7 @@ class MediaContainerList(WebList):
 
         table = self.soup.find('table', class_='listing')
         if table == None:
-            self.links = self.__parse_upcoming(self.soup)
+            self.links = self.__parse_upcoming()
             return
         
         self.links = table.find_all('a', {'href':re.compile('\/Anime\/')})

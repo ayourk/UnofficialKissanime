@@ -18,7 +18,7 @@
 '''
 
 
-import re
+import re, urllib
 from resources.lib.common import args, constants
 from resources.lib.common.helpers import helper
 from resources.lib.common.nethelpers import net, cookies
@@ -26,14 +26,13 @@ from bs4 import BeautifulSoup
 
 
 class WebList(object):
-    def __init__(self):
+    def __init__(self, url_val=args.value):
         self.html = ''
         self.soup = None
         self.links = []
         self.has_next_page = False
 
         assert(args.srctype == 'web')
-        url_val = args.value
         url = url_val if constants.domain_url in url_val else (constants.domain_url + url_val)
         self.html, e = net.get_html(url, cookies, constants.domain_url)
         if self.html == '':

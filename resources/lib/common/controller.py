@@ -18,7 +18,8 @@
 '''
 
 
-from resources.lib.common import args
+import urllib
+from resources.lib.common import args, constants, keyboard
 from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list
 from resources.lib.players import videoplayer, autoplayer
 from resources.lib.common.helpers import helper
@@ -82,3 +83,11 @@ class Controller:
         player = videoplayer.VideoPlayer(args.value)
         player.play()
         helper.end('play_video')
+
+    def search(self):
+        helper.start('search')
+        search_string = keyboard.Keyboard().get_input('Search for title: ')
+        if search_string:
+            search_string = constants.domain_url + 'Search/Anime?' + urllib.urlencode({'keyword':search_string})
+            self._show_list(media_container_list.MediaContainerList(search_string))
+        helper.end('search')

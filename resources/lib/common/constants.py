@@ -119,10 +119,9 @@ submenu_genres = [
 
 main_menu = [
 #    ('Last Anime Visited', {'srctype':'web', 'value':'sql', 'action':'mediaList'),
-    ('Browse', {'srctype':'local', 'value':'submenu_browse', 'action':'genericList'})
+    ('Browse', {'srctype':'local', 'value':'submenu_browse', 'action':'genericList'}),
 #    ('Account', {'value':'nothing'),
-#    ('Search', {'value':'dialog_search'),
-#    ('Settings', {'value':'dialog_settings'}
+    ('Search', {'srctype': 'web', 'value':'dialog_search', 'action':'search'})
 ]
 
 ui_table = {
