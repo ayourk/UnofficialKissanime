@@ -50,7 +50,7 @@
     I ended up choosing the 4th option.
 '''
 import metahandler
-from resources.lib.common.anime_TMDB import AnimeTMDB
+from resources.lib.metadata.anime_TMDB import AnimeTMDB
 metahandler.TMDB.TMDB = AnimeTMDB
 
 

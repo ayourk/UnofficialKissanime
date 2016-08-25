@@ -22,7 +22,7 @@ import re, time
 from datetime import datetime
 from resources.lib.common import args
 from resources.lib.common.helpers import helper
-from resources.lib.common.loose_metahandlers import meta
+from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.web_list import WebList
 from bs4 import BeautifulSoup
 

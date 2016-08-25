@@ -20,7 +20,7 @@
 
 from resources.lib.common.helpers import helper
 from resources.lib.common import args
-from resources.lib.common.loose_metahandlers import meta
+from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.episode_list import EpisodeList
 
 

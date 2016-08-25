@@ -71,7 +71,7 @@ class Controller:
 
     def auto_play(self):
         helper.start('auto_play')
-        player = autoplay.AutoPlayer()
+        player = autoplayer.AutoPlayer()
         player.parse()
         player.add_items()
         player.play()        
