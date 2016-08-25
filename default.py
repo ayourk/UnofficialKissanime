@@ -35,8 +35,8 @@ elif args.action == 'mediaList':
     controller.Controller().show_media_list()
 elif args.action == 'quality':
     controller.Controller().show_quality()
-elif args.action == 'media':
-    controller.Controller().show_media()
+elif args.action == 'autoplay':
+    controller.Controller().auto_play()
 elif args.action == 'play':
     controller.Controller().play_video()
 else:

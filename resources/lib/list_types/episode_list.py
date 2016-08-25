@@ -150,7 +150,7 @@ class EpisodeList(WebList):
                 query = self._construct_query(url, action, metadata)
                 helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
 
-        helper.add_sort_methods(['episode', 'title'])
+        helper.add_sort_methods(['title'])
         helper.end_of_directory()
         helper.end('EpisodeList.add_items')
         return
@@ -183,7 +183,7 @@ class EpisodeList(WebList):
 
     def _get_action_and_isfolder(self):
         select_quality = helper.get_setting('preset-quality') == 'Individually select'
-        action = 'quality' if select_quality else 'play'
+        action = 'quality' if select_quality else 'autoplay'
         is_folder = select_quality # Display a folder if we have to select the quality
         return action, is_folder
 

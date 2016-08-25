@@ -18,18 +18,17 @@
 '''
 
 
+import urlresolver
 from resources.lib.common.helpers import helper
-from resources.lib.common import constants
 
 
-class LocalList(object):
-    def add_directories(self, key):
-        src = constants.ui_table[key]
-        assert(args.srctype == None or args.srctype == 'local')
-        helper.start('LocalList.add_directories')
-        for (name, query) in src:
-            info_labels = {'title': name}
-            helper.add_directory(query, info_labels, total_items=len(src))
-        helper.end_of_directory()
-        helper.end('LocalList.add_directories')
-        return
+class VideoPlayer:
+    def __init__(self, url=''):
+        self.link = self._decode(url)
+
+    def play(self):
+        url = urlresolver.resolve(self.link)
+        helper.resolve_url(url)
+
+    def _decode(self, url):
+        return url.decode('base-64') if url else ''
