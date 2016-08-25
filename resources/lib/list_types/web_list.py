@@ -32,6 +32,9 @@ class WebList(object):
         self.links = []
         self.has_next_page = False
 
+        if not url_val:
+            return
+
         assert(args.srctype == 'web')
         url = url_val if constants.domain_url in url_val else (constants.domain_url + url_val)
         self.html, e = net.get_html(url, cookies, constants.domain_url)

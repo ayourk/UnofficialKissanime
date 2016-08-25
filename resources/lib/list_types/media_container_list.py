@@ -19,7 +19,7 @@
 
 
 import re
-from resources.lib.common import args
+from resources.lib.common import args, constants
 from resources.lib.common.helpers import helper
 from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.web_list import WebList
@@ -74,8 +74,16 @@ class MediaContainerList(WebList):
                                            re.search(' (Special)$', name) != None):
                 media_type = 'special'
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
-            metadata['title'] = name # needed for sub and dub
+
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+            find_metadata_query = self._construct_query(url, 'findmetadata', metadata, name)
+            find_metadata_context_item = constants.find_metadata_action % helper.build_plugin_url(find_metadata_query)
+            if meta.is_metadata_empty(metadata, media_type):
+                contextmenu_items.append(('Find metadata', find_metadata_context_item))
+            else:
+                contextmenu_items.append(('Fix metadata', find_metadata_context_item))
+            
+                metadata['title'] = name # needed for sub and dub
             helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items, total_items=len(mc_links))
 
         if self.has_next_page:

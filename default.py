@@ -41,6 +41,8 @@ elif args.action == 'play':
     controller.Controller().play_video()
 elif args.action == 'search':
     controller.Controller().search()
+elif args.action == 'findmetadata':
+    controller.Controller().find_metadata()
 else:
     helper.log_error("WHAT HAVE YOU DONE?")
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])

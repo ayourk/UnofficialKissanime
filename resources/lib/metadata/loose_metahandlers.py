@@ -152,6 +152,15 @@ class LooseMetaData(MetaData):
             helper.log_debug('The absolute_episode column already exists')
 
         common.addon.log = helper.log
+    
+    def is_metadata_empty(self, metadata, media_type):
+        if not metadata:
+            return True
+        if media_type == 'tvshow' or media_type == 'special':
+            return (not metadata.get('tvdb_id', '') and not metadata.get('imdb_id', ''))
+        if media_type == 'movie':
+            return (not metadata.get('tmdb_id', '') and not metadata.get('imdb_id', ''))
+        return True
 
     def get_episodes_meta(self, tvshowtitle, imdb_id, tvdb_id, num_episodes, first_air_date='', season=None):
         '''
