@@ -127,7 +127,7 @@ class LooseMetaData(MetaData):
             self.dbcon = database.connect(database=db_name, user=db_user, password=db_pass, host=db_address, buffered=True)
             self.dbcur = self.dbcon.cursor(cursor_class=MySQLCursorDict, buffered=True)
         else:
-            self.dbcon = database.connect(self.videocache)
+            self.dbcon = database.connect(self.videocache, isolation_level=None, check_same_thread=False)
             self.dbcon.row_factory = database.Row # return results indexed by field names and not numbers so we can convert to dict
             self.dbcur = self.dbcon.cursor()
 
@@ -149,6 +149,7 @@ class LooseMetaData(MetaData):
             helper.log_debug('The absolute_episode column already exists')
 
         common.addon.log = helper.log
+        self.lock = threading.Lock()
     
     def is_metadata_empty(self, metadata, media_type):
         if not metadata:
@@ -640,5 +641,27 @@ class LooseMetaData(MetaData):
             return None
         return matchedrow
 
+    #TEST
+    def _cache_lookup_by_id(self, media_type, imdb_id = '', tmdb_id = ''):
+        self.lock.acquire()
+        result = MetaData._cache_lookup_by_id(self, media_type, imdb_id, tmdb_id)
+        self.lock.release()
+        return result
+
+    def _cache_lookup_by_name(self, media_type, name, year = ''):
+        self.lock.acquire()
+        result = MetaData._cache_lookup_by_name(self, media_type, name, year)
+        self.lock.release()
+        return result
+
+    def _cache_save_video_meta(self, meta_group, name, media_type, overlay = 6):
+        self.lock.acquire()
+        MetaData._cache_save_video_meta(self, meta_group, name, media_type, overlay)
+        self.lock.release()
+
+    def _cache_delete_video_meta(self, media_type, imdb_id, tmdb_id, name, year):
+        self.lock.acquire()
+        MetaData._cache_delete_video_meta(self, media_type, imdb_id, tmdb_id, name, year)
+        self.lock.release()
 
 meta = init()

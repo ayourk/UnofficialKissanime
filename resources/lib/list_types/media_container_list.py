@@ -19,16 +19,26 @@
 
 
 import re
-from resources.lib.common import args, constants
+from resources.lib.common import args, constants, threadpool
 from resources.lib.common.helpers import helper
 from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.web_list import WebList
 from bs4 import BeautifulSoup
 
+
+
+# DEBUG
+import time
+
+
+
 class MediaContainerList(WebList):
     def __init__(self, url_val=args.value):
+        t0 = time.time()
         WebList.__init__(self, url_val)
         self.has_next_page = False
+        t1 = time.time()
+        helper.log_notice('TIMER - MEDIACONTAINERLIST.INIT: %f' % (t1 - t0))
 
     ''' PUBLIC FUNCTIONS '''
     def parse(self):
@@ -36,9 +46,12 @@ class MediaContainerList(WebList):
         if self.soup == None:
             return
 
+        t0 = time.time()
         table = self.soup.find('table', class_='listing')
         if table == None:
             self.links = self.__parse_upcoming()
+            t1 = time.time()
+            helper.log_notice('TIMER - MEDIACONTAINERLIST.PARSE: %f' % (t1 - t0))
             return
         
         self.links = table.find_all('a', {'href':re.compile('\/Anime\/')})
@@ -52,22 +65,39 @@ class MediaContainerList(WebList):
                 self.links.append(page_links[-2])
                 self.links.append(page_links[-1])
                 self.has_next_page = True
-        helper.end('MediaContainerList.parse')    
+        helper.end('MediaContainerList.parse')
+        t1 = time.time()
+        helper.log_notice('TIMER - MEDIACONTAINERLIST.PARSE: %f' % (t1 - t0))
+
+    def worker(self, tuple):
+        (name, url, idx) = tuple
+        metadata, media_type = self._get_metadata(name)
+        self.links_with_metadata[idx] = (name, url, metadata, media_type)
 
     def add_items(self):
+        t0 = time.time()
         helper.set_content('tvshows')
         iter_links = self.links[:-2] if self.has_next_page else self.links
 
         # Filter out the episode links for ongoing series
+        t1 = time.time()
         mc_links = []
+        idx = 0
         for link in iter_links:
             url = link['href']
             if re.search('(\?id=)', url) != None:
                 continue
-            mc_links.append((link.string.strip(), url))
+            mc_links.append((link.string.strip(), url, idx))
+            idx += 1
+        t2 = time.time()
+        helper.log_notice('TIMER - MEDIACONTAINERLIST.ADD_ITEMS - initial loop: %f' % (t2 - t1))
 
-        for (name, url) in mc_links:
-            metadata, media_type = self._get_metadata(name)
+        self.links_with_metadata = [None] * idx
+        pool = threadpool.ThreadPool(4)
+        pool.map(self.worker, mc_links)
+        pool.wait_completion()
+
+        for (name, url, metadata, media_type) in self.links_with_metadata:
             icon, fanart = self._get_art_from_metadata(metadata)
             if media_type == 'tvshow' and (' (OVA)' in name or ' Specials' in name or
                                            re.search('( OVA)( \(((Sub)|(Dub))\))?$', name) != None or 
@@ -93,6 +123,9 @@ class MediaContainerList(WebList):
             helper.add_directory(query, {'title':'Last'})
 
         helper.end_of_directory()
+        t_end = time.time()
+        helper.log_notice('TIMER - MEDIACONTAINERLIST.ADD_ITEMS: %f' % (t_end - t0))
+
 
     ''' OVERRIDDEN PROTECTED FUNCTIONS '''
     def _get_metadata(self, name):
@@ -100,25 +133,37 @@ class MediaContainerList(WebList):
         if helper.get_setting('enable-metadata') == 'false' or name == 'Next' or name == 'Last':
             return {}, ''
 
+        t0 = time.time()
+
         name_for_movie_search = self._clean_name(name)
         name_for_tv_search = self.__clean_tv_show_name(name_for_movie_search)
         media_type = 'tvshow'
 
         # Not sure if movie or tv show; try tv show first
         metadata = meta.get_meta('tvshow', name_for_tv_search)#, year=year)
-        helper.log_debug('got metadata %s for show %s' % (metadata, name_for_tv_search))
+        helper.log_debug('Got metadata %s for show %s' % (metadata, name_for_tv_search))
+        t1 = time.time()
+        t2, t3, t4 = t1, t1, t1
         # It may be a movie, so let's try that with the general cleaned name
         if metadata['tvdb_id'] == '':
             metadata = meta.get_meta('movie', name_for_movie_search)#, year=year)
+            t2 = time.time()
             # If movie failed, and if there was a year in the name, try tv without it
             if metadata['tmdb_id'] == '' and re.search('( \([12][0-9]{3}\))$', name_for_tv_search) != None:
                 metadata = meta.get_meta('tvshow', name_for_tv_search[:-7], update=True)
+                t3 = time.time()
                 if metadata['imdb_id'] != '':
                     metadata = meta.update_meta('tvshow', name_for_tv_search, imdb_id='', new_imdb_id=metadata['imdb_id'])
+                    t4 = time.time()
             elif metadata['tmdb_id'] != '': # otherwise we found a move
                 media_type = 'movie'
 
         helper.end('MediaContainerList._get_metadata')
+
+        t_end = time.time()
+        helper.log_notice('TIMER - MEDIACONTAINERLIST._GET_METADTA - TOTAL:%f, TV:%f, MOVIE:%f, YEAR:%f, UPDATE:%f' %
+                          (t_end-t0, t1-t0, t2-t1, t3-t2, t4-t3))
+
         return (metadata, media_type)
 
     ''' PRIVATE FUNCTIONS '''

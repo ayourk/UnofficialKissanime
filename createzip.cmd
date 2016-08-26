@@ -6,4 +6,4 @@ copy *xml plugin.video.unofficialkissanime
 copy icon.png plugin.video.unofficialkissanime
 copy README.md plugin.video.unofficialkissanime
 xcopy /E resources plugin.video.unofficialkissanime\resources\
-"C:\Program Files\7-Zip\7z.exe" a plugin.video.unofficialkissanime.zip plugin.video.unofficialkissanime\
+"C:\Program Files\7-Zip\7z.exe" a plugin.video.unofficialkissanime-0.0.1.zip plugin.video.unofficialkissanime\

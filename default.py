@@ -18,6 +18,11 @@
 '''
 
 
+# DEBUG
+import time
+t_start = time.time()
+
+
 from resources.lib.common.helpers import helper
 from resources.lib.common import controller
 from resources.lib.common import args
@@ -48,3 +53,6 @@ else:
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])
 
 helper.location("Default exit point")
+
+t_end = time.time()
+helper.log_notice('TIMER - TOTAL TIME: %f' % (t_end - t_start))
