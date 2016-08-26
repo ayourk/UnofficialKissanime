@@ -56,7 +56,7 @@ class EpisodeList(WebList):
         # We'll try to determine the episode list from the first date
         span = [s for s in spans if s.string == 'Date aired:']
         if span != []:
-            air_date = span[0].next_sibling.encode('ascii', errors='ignore').strip().split(' to ')[0]
+            air_date = span[0].next_sibling.encode('ascii', 'ignore').strip().split(' to ')[0]
             air_datetime = helper.get_datetime(air_date, '%b %d, %Y')
             self.first_air_date = air_datetime.strftime('%Y-%m-%d')
             helper.log_debug('Found the first air date: %s' % str(self.first_air_date))
@@ -120,6 +120,7 @@ class EpisodeList(WebList):
 
         specials = []
         episodes = []
+        double_eps = 0
         for link in self.links:
             name = link.string.strip()
             url = link['href']
@@ -128,22 +129,30 @@ class EpisodeList(WebList):
                 specials.append((name, url))
             elif 'recap' in name_minus_show.lower() or '.5' in name_minus_show:
                 specials.append((name, url))
+            elif re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None:
+                double_eps += 1
+                episodes.append((name, url))
             else:
                 episodes.append((name, url))
 
-        self.num_episodes = len(episodes)
+        self.num_episodes = len(episodes) + double_eps
         helper.log_debug('We have %d episodes' % self.num_episodes)
         action, is_folder = self._get_action_and_isfolder()
         helper.set_content('episodes')
 
         all_metadata = self._get_metadata(args.base_mc_name)
         helper.log_debug('We have %d metadata entries' % len(all_metadata))
+        offset = 0
         for idx, (name, url) in enumerate(episodes):
-            metadata = all_metadata[idx] if len(all_metadata) > 0 else {'title':name}
+            metadata = all_metadata[idx+offset] if len(all_metadata) > 0 else {'title':name}
             icon, fanart = self._get_art_from_metadata(metadata)
             query = self._construct_query(url, action, metadata)
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
-            metadata['title'] = '%d - %s' % ((idx + 1), metadata['title'])
+            if re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None:
+                metadata['title'] = '%d & %d - %s' % ((idx+offset+1), (idx+offset+2), metadata['title'])
+                offset += 1
+            else:
+                metadata['title'] = '%d - %s' % ((idx+offset+1), metadata['title'])
             helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
 
         if len(specials) > 0:

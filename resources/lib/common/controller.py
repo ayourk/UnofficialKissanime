@@ -19,7 +19,7 @@
 
 
 import urllib
-from resources.lib.common import args, constants, keyboard
+from resources.lib.common import args, constants
 from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list
 from resources.lib.players import videoplayer, autoplayer
 from resources.lib.common.helpers import helper

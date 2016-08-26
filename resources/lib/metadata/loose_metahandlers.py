@@ -284,7 +284,8 @@ class LooseMetaData(MetaData):
                       'episode_meta.poster as cover_url ' 
                       'FROM episode_meta, tvshow_meta '
                       'WHERE episode_meta.tvdb_id = tvshow_meta.tvdb_id AND '
-                      'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ?')
+                      'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ?'
+                      'ORDER BY episode_meta.absolute_episode ASC')
         helper.log_debug('SQL select: %s with params %s' % (sql_select, (tvdb_id, first_ep, last_ep)))
         try:
             self.dbcur.execute(sql_select, (tvdb_id, first_ep, last_ep))
@@ -407,7 +408,7 @@ class LooseMetaData(MetaData):
                     break
                 # Check aliases
                 if show.has_key('AliasNames'):
-                    helper.log_debug('Looking at the aliases: %s' % str(show['AliasNames'].encode('ascii', errors='xmlcharrefreplace').split('|')))
+                    helper.log_debug('Looking at the aliases: %s' % str(show['AliasNames'].encode('ascii', 'xmlcharrefreplace').split('|')))
                     for alias in show['AliasNames'].split('|'):
                         if strcmp(clean(alias), clean(name)):
                             prob_id = clean(show['seriesid'])
@@ -595,7 +596,9 @@ class LooseMetaData(MetaData):
                 num_episodes -= 1
             else:
                 helper.log_debug('Skipping meta for absolute episode %d' % meta['absolute_episode'])
-        return tmp_meta_list
+
+        final_meta_list = sorted(tmp_meta_list, key=lambda d: database['absolute_episode'])
+        return final_meta_list
 
     def __filter_meta_list_by_season(self, meta_list, season, num_episodes):
         helper.log_debug('Filtering metadata list by season %d' % season)
@@ -626,7 +629,7 @@ class LooseMetaData(MetaData):
             params = (tvdb_id, season)
         else:
             sql_select += 'season=1 AND episode=1'
-            params = (tvdb_id)
+            params = (tvdb_id, )
 
         helper.log_debug('SQL select: %s with params %s' % (sql_select, params))
         try:

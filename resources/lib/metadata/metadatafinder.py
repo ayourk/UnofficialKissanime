@@ -48,6 +48,7 @@ class MetadataFinder(object):
             else:
                 break
 
+        helper.show_busy_notification()
         metadata, media_type = media_container_list.MediaContainerList(None)._get_metadata(search_string)
         if metadata.get('tvdb_id', ''):
             helper.log_debug('Found metadata from search for %s; refreshing the page ' % args.base_mc_name)
@@ -55,3 +56,4 @@ class MetadataFinder(object):
             helper.refresh_page()
         else:
             helper.show_ok_dialog(['Did not find any metadata from the search query.  Please try again.'])
+        helper.close_busy_notification()
