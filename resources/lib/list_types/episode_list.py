@@ -94,6 +94,9 @@ class EpisodeList(WebList):
 
     def add_items(self):
         helper.start('EpisodeList.add_items')
+        if self.links == []:
+            return
+
         # We now have a list of episodes in links, and we need to figure out
         # which season those episodes belong to, as well as filter out stray
         # specials/OVAs.  I have a numbered FSM for this.  The caller should

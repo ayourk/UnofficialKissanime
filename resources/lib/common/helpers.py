@@ -18,7 +18,7 @@
 '''
 
 
-import sys, time, unicodedata, xbmc, xbmcplugin
+import sys, time, unicodedata, xbmc, xbmcplugin, xbmcgui
 from datetime import datetime
 from addon.common.addon import Addon
 from resources.lib.common import constants
@@ -43,6 +43,9 @@ class Helper(Addon):
 
     # AKA youve_got_to_be_kidding_me
     def get_datetime(self, date_str, format):
+        if not date_str:
+            None
+
         if len(date_str) == 4:
             format = '%Y'
         try:
@@ -73,6 +76,19 @@ class Helper(Addon):
             keyboard.setDefault(default_text)
         keyboard.doModal()
         return keyboard.getText() if keyboard.isConfirmed() else None
+
+    def show_busy_notification(self):
+        xbmc.executebuiltin('ActivateWindow(busydialog)')
+
+    def close_busy_notification(self):
+        xbmc.executebuiltin('Dialog.Close(busydialog)')
+
+    def refresh_page(self):
+        xbmc.executebuiltin('Container.Refresh')
+
+    def present_selection_dialog(self, title, options):
+        dialog = xbmcgui.Dialog()
+        return dialog.select(title, options)
 
 
 helper = init()

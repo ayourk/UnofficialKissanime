@@ -23,11 +23,7 @@ from resources.lib.common import args, constants, keyboard
 from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list
 from resources.lib.players import videoplayer, autoplayer
 from resources.lib.common.helpers import helper
-
-
-# TEMP
-import xbmcgui, xbmc
-from resources.lib.metadata.loose_metahandlers import meta
+from resources.lib.metadata import metadatafinder
 
 
 class Controller:
@@ -99,37 +95,6 @@ class Controller:
 
     def find_metadata(self):
         helper.start('find_metadata')
-        path = xbmc.getInfoLabel('ListItem.FileNameAndPath')
-        helper.log_debug('here is the path %s' % path)
-        #win = xbmcgui.Window(xbmcgui.getCurrentWindowId())
-        #curctl = win.getFocus()
-        #cursel = curctl.get
-
-        xbmc.executebuiltin('ActivateWindow(busydialog)')
-        list = episode_list.EpisodeList()
-        list.parse()
-        options = list.aliases
-        options.insert(0, 'Manual search')
-        options.insert(1, args.base_mc_name)
-        dialog = xbmcgui.Dialog()
-        xbmc.executebuiltin('Dialog.Close(busydialog)')
-        search_string = None
-        # THIS SHIT WILL NEVER END, PLEASE FIX
-        while not search_string:
-            idx = dialog.select('Choose a title to search for', options)
-            helper.log_debug('User selected index %d' % idx)
-            if idx == 0:
-                search_string = helper.get_user_input('Manually type the show to find metadata for')
-            else:
-                search_string = helper.get_user_input('Alter the title if necessary', options[idx])
-            if not search_string:
-                helper.show_ok_dialog(['Invalid search query.  Please try again'])
-
-        # I have the string to search for; now I need to feed it to my metadata query thing
-        metadata, media_type = media_container_list.MediaContainerList(None)._get_metadata(search_string)
-        helper.log_debug('metadata from search string: %s' % str(metadata))
-        if metadata.get('tvdb_id', ''):
-            meta.update_meta(media_type, args.base_mc_name, imdb_id='', new_tmdb_id=metadata.get('tvdb_id'), new_imdb_id=metadata.get('imdb_id'), )
-            #xbmc.executebuiltin('Container.Update')
-
+        finder = metadatafinder.MetadataFinder()
+        finder.search_and_update()
         helper.end('find_metadata')

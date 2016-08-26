@@ -74,9 +74,6 @@ class LooseMetaData(MetaData):
         different db path, which unfortunately required pasting this function 
         and modifying it :/
         '''
-        #Check if a path has been set in the addon settings
-        settings_path = common.addon.get_setting('meta_folder_location')
-        
         # TMDB constants
         self.tmdb_image_url = ''
         try:
@@ -188,9 +185,20 @@ class LooseMetaData(MetaData):
                 helper.log_debug('Grabbing show and episodes for metadata')
                 tvdb = TheTVDB(language=self._MetaData__get_tvdb_language())
                 (show, episode_list) = tvdb.get_show_and_episodes(tvdb_id)
-                meta_list = [self._episode_to_meta(ep, tvshowtitle, show) for ep in episode_list]
-                # we want to save the metadata for all the episodes (for 
-                # caching reasons), so we'll filter later
+                meta_list, curr_abs_num = [], 0
+                for ep in episode_list:
+                    m = self._episode_to_meta(ep, tvshowtitle, show)
+                    # Fix the absolute episode number if it doesn't exist at any point
+                    # I assume the list is sorted by season/episode
+                    if m['season'] != 0:
+                        if m['absolute_episode'] != -1:
+                            curr_abs_num = m['absolute_episode']
+                        else:
+                            curr_abs_num += 1
+                            m['absolute_episode'] = curr_abs_num
+                    meta_list.append(m)
+                         
+                #meta_list = [self._episode_to_meta(ep, tvshowtitle, show) for ep in episode_list]
             else:
                 helper.log_debug('No TVDB ID available, could not find TV show with imdb: %s' % imdb_id)
                 tvdb_id = ''
@@ -576,6 +584,9 @@ class LooseMetaData(MetaData):
                 tmp_meta_list.append(meta)
                 num_episodes -= 1
                 continue
+            if meta['premiered'] == '':
+                helper.log_debug('Episode has no premiered data, so skipping')
+                continue
             date = helper.get_datetime(meta['premiered'], '%Y-%m-%d')
             days = abs((first_date - date).days)
             if days <= 1: # start of the sequence
@@ -583,7 +594,7 @@ class LooseMetaData(MetaData):
                 tmp_meta_list.append(meta)
                 num_episodes -= 1
             else:
-                helper.log_debug('Skipping meta %s' % str(meta))
+                helper.log_debug('Skipping meta for absolute episode %d' % meta['absolute_episode'])
         return tmp_meta_list
 
     def __filter_meta_list_by_season(self, meta_list, season, num_episodes):

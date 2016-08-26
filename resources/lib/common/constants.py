@@ -24,6 +24,7 @@ import os, sys, xbmcvfs
 plugin_name = 'plugin.video.unofficialkissanime'
 domain_url = 'https://kissanime.to/'
 find_metadata_action = 'XBMC.RunPlugin(%s)'
+appdata_cache_path = 'appdata.db'
 
 
 submenu_browse = [
