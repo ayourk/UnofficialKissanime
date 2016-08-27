@@ -18,24 +18,35 @@
 '''
 
 
-import urllib
 from resources.lib.common import args, constants
 from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list
 from resources.lib.players import videoplayer, autoplayer
 from resources.lib.common.helpers import helper
 from resources.lib.metadata import metadatafinder
+from resources.lib.appdata import lastvisited
 
 
 class Controller:
     def main_menu(self):
         helper.start('main_menu')
-        local_list.LocalList().add_directories('main_menu')
-        helper.end("main_menu")
+        local_list.LocalList().add_directories(self._get_main_menu_src())
+        helper.end('main_menu')
         return
+
+    def _get_main_menu_src(self):
+        main_menu = constants.main_menu
+        last_show_queries = lastvisited.LastVisited().get_last_anime_visited()
+        if last_show_queries:
+            (last_anime_visited_title, queries) = main_menu[0]
+            title = '%s - %s' % (last_show_queries.get('full_mc_name'), last_anime_visited_title)
+            queries['icon'] = last_show_queries.get('icon', '')
+            queries['fanart'] = last_show_queries.get('fanart', '')
+            main_menu[0] = (title, queries)
+        return main_menu
 
     def show_list(self):
         helper.start("show_list")
-        local_list.LocalList().add_directories(args.value)
+        local_list.LocalList().add_directories(constants.ui_table[args.value])
         helper.end("show_list")
         return
 
@@ -62,6 +73,7 @@ class Controller:
     def show_media_list(self):
         helper.start('show_media_list')
         self._show_list(episode_list.EpisodeList())
+        lastvisited.LastVisited().update_last_anime_visited()
         helper.end('show_media_list')
         return
 
@@ -89,8 +101,10 @@ class Controller:
         helper.start('search')
         search_string = helper.get_user_input('Search for show title')
         if search_string:
-            search_string = constants.domain_url + 'Search/Anime?' + urllib.urlencode({'keyword':search_string})
-            self._show_list(media_container_list.MediaContainerList(search_string))
+            url = helper.domain_url() + 'AdvanceSearch'
+            form_data = {'animeName':search_string, 'genres':'0', 'status':''}
+            helper.log_debug('Searching for show using url %s and form data %s' % (url, str(form_data)))
+            self._show_list(media_container_list.MediaContainerList(url, form_data))
         helper.end('search')
 
     def find_metadata(self):
@@ -98,3 +112,15 @@ class Controller:
         finder = metadatafinder.MetadataFinder()
         finder.search_and_update()
         helper.end('find_metadata')
+
+    # The last anime visited entry is really a redirector to the url.  I did 
+    # this (instead of having the entry point directly to the anime) so that 
+    # widgets for the Last Anime Visited are not hard coded to that specific show.
+    def show_last_visited(self):
+        helper.start('show_last_visited')
+        last_show_queries = lastvisited.LastVisited().get_last_anime_visited()
+        if last_show_queries:
+            helper.go_to_page_using_queries(last_show_queries)
+        else:
+            helper.show_ok_dialog(['Visit an anime to populate this directory'], 'Last Anime Visited not set')
+        helper.end('show_last_visited')

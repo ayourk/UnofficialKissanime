@@ -22,7 +22,7 @@ import os, sys, xbmcvfs
 
 
 plugin_name = 'plugin.video.unofficialkissanime'
-domain_url = 'https://kissanime.to/'
+domain = 'kissanime.to'
 find_metadata_action = 'XBMC.RunPlugin(%s)'
 appdata_cache_path = 'appdata.db'
 
@@ -120,7 +120,7 @@ submenu_genres = [
 ]
 
 main_menu = [
-#    ('Last Anime Visited', {'srctype':'web', 'value':'sql', 'action':'mediaList'),
+    ('Last Anime Visited', {'srctype':'web', 'value':'sql', 'action':'lastvisited'}),
     ('Browse', {'srctype':'local', 'value':'submenu_browse', 'action':'genericList'}),
 #    ('Account', {'value':'nothing'),
     ('Search', {'srctype': 'web', 'value':'dialog_search', 'action':'search'})

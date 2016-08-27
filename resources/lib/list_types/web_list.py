@@ -26,7 +26,7 @@ from bs4 import BeautifulSoup
 
 
 class WebList(object):
-    def __init__(self, url_val=args.value):
+    def __init__(self, url_val=args.value, form_data=None):
         self.html = ''
         self.soup = None
         self.links = []
@@ -36,8 +36,8 @@ class WebList(object):
             return
 
         assert(args.srctype == 'web')
-        url = url_val if constants.domain_url in url_val else (constants.domain_url + url_val)
-        self.html, e = net.get_html(url, cookies, constants.domain_url)
+        url = url_val if 'http' in url_val else (helper.domain_url() + url_val)
+        self.html, e = net.get_html(url, cookies, helper.domain_url(), form_data)
         if self.html == '':
             if e.message == 'The service is unavailable.':
                 helper.log_debug('The service is unavailable.')
@@ -58,6 +58,7 @@ class WebList(object):
             self.html = ''
         helper.log_debug('HTML is %sempty' % ('' if self.html == '' else 'not '))
         
+        self.html = self._filter_html(self.html)
         self.soup = BeautifulSoup(self.html) if self.html != '' else None
 
     def parse(self):
@@ -68,6 +69,14 @@ class WebList(object):
 
     def _get_metadata(self):
         pass
+
+    def _filter_html(self, html):
+        new_lines = []
+        for line in html.split('\n'):
+            if 'Please disable AdBlock' not in line:
+                new_lines.append(line)
+        html = '\n'.join(new_lines)
+        return html
 
     def _get_art_from_metadata(self, metadata):
         icon = metadata.get('cover_url', args.icon)

@@ -23,13 +23,12 @@ from resources.lib.common import constants
 
 
 class LocalList(object):
-    def add_directories(self, key):
-        src = constants.ui_table[key]
-        assert(args.srctype == None or args.srctype == 'local')
+    def add_directories(self, src):
         helper.start('LocalList.add_directories')
         for (name, query) in src:
-            info_labels = {'title': name}
-            helper.add_directory(query, info_labels, total_items=len(src))
+            icon = query.get('icon', '')
+            fanart = query.get('fanart', '')
+            helper.add_directory(query, infolabels={'title':name}, img=icon, fanart=fanart, total_items=len(src))
         helper.end_of_directory()
         helper.end('LocalList.add_directories')
         return

@@ -1,6 +1,7 @@
 <settings>
     <category label="General">
-        <setting id="preset-quality" label="Preset Quality" type="labelenum" values="Individually select|1080p|720p|480p|360p"/>
+        <setting id="preset-quality" label="Preset Quality" type="labelenum" values="Individually select|1080p|720p|480p|360p" default="Individually select"/>
         <setting id="enable-metadata" label="Enable downloading metadata, including fanart" type="bool" default="true"/>
+        <setting id="http-type" label="Select HTTP type" type="labelenum" values="http|https" default="http"/>
     </category>
 </settings>

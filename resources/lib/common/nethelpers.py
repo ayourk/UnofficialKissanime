@@ -67,9 +67,11 @@ class NetHelper(Net):
         else:
             try:
                 r = Net._fetch(self, url, form_data, headers, compression)
+                helper.log_debug('Did not encounter a cloudflare challenge')
                 return r
             except urllib2.HTTPError as e:
                 if e.code == 503:
+                    helper.log_debug('Encountered a cloudflare challenge')
                     challenge = e.read()
                     if challenge == 'The service is unavailable.':
                         helper.log_debug('Challenge says the service is unavailable')
@@ -81,9 +83,10 @@ class NetHelper(Net):
                         return Net._fetch(self, url, form_data, headers, compression)
                     except urllib2.HTTPError as e:
                         helper.log_debug("Failed to set up cloudflare with exception %s" % str(e))
-                        pass
+                        raise
                 else:
-                    pass
+                    helper.log_debug('Initial attempt failed with code %d' % e.code)
+                    raise
 
     def _resolve_cloudflare(self, url, challenge, form_data={}, headers={}, compression=True):
         """
@@ -190,18 +193,20 @@ class NetHelper(Net):
         self._cj = tmp_jar
         return
 
-    def get_html(self, url, cookies, referer):
+    def get_html(self, url, cookies, referer, form_data=None):
         html = ''
         try:
             self.set_cookies(cookies)
-            html = self.http_GET(url, headers={'Referer':referer}).content
+            if form_data:
+                html = self.http_POST(url, form_data, headers={'Referer':referer}).content
+            else:
+                html = self.http_GET(url, headers={'Referer':referer}).content
             if html != '':
                 self.save_cookies(cookies)
             return (html, None)
         except urllib2.URLError as e: 
             return ('', e)
         except Exception as e:
-            pass
             return ('', e)
         except:
             return ('', None)

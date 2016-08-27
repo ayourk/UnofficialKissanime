@@ -48,6 +48,8 @@ elif args.action == 'search':
     controller.Controller().search()
 elif args.action == 'findmetadata':
     controller.Controller().find_metadata()
+elif args.action == 'lastvisited':
+    controller.Controller().show_last_visited()
 else:
     helper.log_error("WHAT HAVE YOU DONE?")
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])

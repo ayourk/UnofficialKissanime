@@ -33,9 +33,9 @@ import time
 
 
 class MediaContainerList(WebList):
-    def __init__(self, url_val=args.value):
+    def __init__(self, url_val=args.value, form_data=None):
         t0 = time.time()
-        WebList.__init__(self, url_val)
+        WebList.__init__(self, url_val, form_data)
         self.has_next_page = False
         t1 = time.time()
         helper.log_notice('TIMER - MEDIACONTAINERLIST.INIT: %f' % (t1 - t0))

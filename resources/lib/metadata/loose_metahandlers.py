@@ -54,7 +54,7 @@ from resources.lib.metadata.anime_TMDB import AnimeTMDB
 metahandler.TMDB.TMDB = AnimeTMDB
 
 
-import os, xbmcvfs
+import os, threading
 from datetime import datetime, timedelta
 from metahandler.metahandlers import *
 from metahandler.thetvdbapi import TheTVDB
@@ -598,7 +598,7 @@ class LooseMetaData(MetaData):
             else:
                 helper.log_debug('Skipping meta for absolute episode %d' % meta['absolute_episode'])
 
-        final_meta_list = sorted(tmp_meta_list, key=lambda d: database['absolute_episode'])
+        final_meta_list = sorted(tmp_meta_list, key=lambda d: d['absolute_episode'])
         return final_meta_list
 
     def __filter_meta_list_by_season(self, meta_list, season, num_episodes):
@@ -618,6 +618,7 @@ class LooseMetaData(MetaData):
             else:
                 helper.log_debug('Skipping meta')
                 pass
+        final_meta_list = sorted(tmp_meta_list, key=lambda d: d['absolute_episode'])
         return tmp_meta_list
 
     def __cache_find_absolute_episode(self, tvdb_id, first_air_date, season):

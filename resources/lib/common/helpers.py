@@ -90,5 +90,12 @@ class Helper(Addon):
         dialog = xbmcgui.Dialog()
         return dialog.select(title, options)
 
+    def go_to_page_using_queries(self, queries):
+        xbmc.executebuiltin('XBMC.Container.Update(%s)' % self.build_plugin_url(queries))
+
+    def domain_url(self):
+        self.log_debug('dafuq: %s' % self.get_setting('http-type'))
+        return ('%s://%s/' % (self.get_setting('http-type'), constants.domain))
+
 
 helper = init()
