@@ -62,7 +62,7 @@ class Helper(Addon):
 
     sort_method_dict = {
         'episode' : xbmcplugin.SORT_METHOD_EPISODE,
-        'title' : xbmcplugin.SORT_METHOD_TITLE
+        'title' : xbmcplugin.SORT_METHOD_VIDEO_SORT_TITLE
     }
 
     def add_sort_methods(self, sort_methods):

@@ -74,9 +74,14 @@ class MediaContainerList(WebList):
         metadata, media_type = self._get_metadata(name)
         self.links_with_metadata[idx] = (name, url, metadata, media_type)
 
-    def add_items(self):
+    # If title_prefix is not None, then assume we are being included inline 
+    # and let the caller handle setting the content type and ending the directory
+    def add_items(self, title_prefix=None):
         t0 = time.time()
-        helper.set_content('tvshows')
+        end_dir = title_prefix == None
+        title_prefix = title_prefix if title_prefix else ''
+        if not end_dir:
+            helper.set_content('tvshows')
         iter_links = self.links[:-2] if self.has_next_page else self.links
 
         # Filter out the episode links for ongoing series
@@ -113,7 +118,7 @@ class MediaContainerList(WebList):
             else:
                 contextmenu_items.append(('Fix metadata', find_metadata_context_item))
             
-                metadata['title'] = name # needed for sub and dub
+            metadata['title'] = title_prefix + name # needed for sub and dub
             helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items, total_items=len(mc_links))
 
         if self.has_next_page:
@@ -122,7 +127,8 @@ class MediaContainerList(WebList):
             query = self._construct_query(self.links[-1]['href'], 'mediaContainerList')
             helper.add_directory(query, {'title':'Last'})
 
-        helper.end_of_directory()
+        if end_dir:
+            helper.end_of_directory()
         t_end = time.time()
         helper.log_notice('TIMER - MEDIACONTAINERLIST.ADD_ITEMS: %f' % (t_end - t0))
 

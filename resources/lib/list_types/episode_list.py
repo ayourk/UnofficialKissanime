@@ -27,11 +27,15 @@ from resources.lib.list_types.web_list import WebList
 from bs4 import BeautifulSoup
 
 
+from resources.lib.list_types import media_container_list
+
+
 class EpisodeList(WebList):
     def __init__(self):
         WebList.__init__(self)
         self.genres = []
         self.aliases = []
+        self.related_links = []
         self.first_air_date = ''
         self.season = None
         self.num_episodes = 0
@@ -69,6 +73,15 @@ class EpisodeList(WebList):
             f = lambda c: ord(c) > 0x3000
             self.aliases = [link.string for link in alias_links if filter(f, link.string) == u'']
             helper.log_debug('Found the aliases: %s' % str(self.aliases))
+
+        rightboxes = self.soup.find('div', id='rightside').find_all('div', class_='rightBox')
+        if len(rightboxes) > 1:
+            related = rightboxes[1].find('div', class_='barContent').find_all('a')
+            for link in related:
+                self.related_links.append(link)
+                has_class = dict(link.next_sibling.next_sibling.attrs).has_key('class')
+                if has_class and link.next_sibling.next_sibling['class'][0] == u'line':
+                    break
 
         # Sort episodes in ascending order by default
         self.links.reverse()
@@ -161,6 +174,11 @@ class EpisodeList(WebList):
                 metadata = {'title':name}
                 query = self._construct_query(url, action, metadata)
                 helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
+
+        # Add related links using the MCL (since they're all media containers)
+        mclist = media_container_list.MediaContainerList(None)
+        mclist.links = self.related_links
+        mclist.add_items(title_prefix='Related: ')
 
         helper.add_sort_methods(['title'])
         helper.end_of_directory()
