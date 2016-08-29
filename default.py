@@ -50,6 +50,12 @@ elif args.action == 'findmetadata':
     controller.Controller().find_metadata()
 elif args.action == 'lastvisited':
     controller.Controller().show_last_visited()
+elif args.action == 'bookmarkList':
+    controller.Controller().show_bookmark_list()
+elif args.action == 'addBookmark':
+    controller.Controller().add_bookmark()
+elif args.action == 'removeBookmark':
+    controller.Controller().remove_bookmark()
 else:
     helper.log_error("WHAT HAVE YOU DONE?")
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])

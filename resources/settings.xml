@@ -4,4 +4,8 @@
         <setting id="enable-metadata" label="Enable downloading metadata, including fanart" type="bool" default="true"/>
         <setting id="http-type" label="Select HTTP type" type="labelenum" values="http|https" default="http"/>
     </category>
+    <category label="Account">
+        <setting id="username" label="Username" type="text" default=""/>
+        <setting id="password" label="password" type="text" default="" option="hidden"/>
+    </category>
 </settings>

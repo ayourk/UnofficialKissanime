@@ -110,14 +110,7 @@ class MediaContainerList(WebList):
                 media_type = 'special'
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
 
-            contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
-            find_metadata_query = self._construct_query(url, 'findmetadata', metadata, name)
-            find_metadata_context_item = constants.find_metadata_action % helper.build_plugin_url(find_metadata_query)
-            if meta.is_metadata_empty(metadata, media_type):
-                contextmenu_items.append(('Find metadata', find_metadata_context_item))
-            else:
-                contextmenu_items.append(('Fix metadata', find_metadata_context_item))
-            
+            contextmenu_items = self._get_contextmenu_items(url, name, metadata, media_type)
             metadata['title'] = title_prefix + name # needed for sub and dub
             helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items, total_items=len(mc_links))
 
@@ -171,6 +164,17 @@ class MediaContainerList(WebList):
                           (t_end-t0, t1-t0, t2-t1, t3-t2, t4-t3))
 
         return (metadata, media_type)
+
+    ''' PROTECTED FUNCTIONS '''
+    def _get_contextmenu_items(self, url, name, metadata, media_type):
+        contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+        find_metadata_query = self._construct_query(url, 'findmetadata', metadata, name)
+        find_metadata_context_item = constants.runplugin % helper.build_plugin_url(find_metadata_query)
+        if meta.is_metadata_empty(metadata, media_type):
+            contextmenu_items.append(('Find metadata', find_metadata_context_item))
+        else:
+            contextmenu_items.append(('Fix metadata', find_metadata_context_item))
+        return contextmenu_items
 
     ''' PRIVATE FUNCTIONS '''
     def __parse_upcoming(self):

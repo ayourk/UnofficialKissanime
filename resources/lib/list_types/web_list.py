@@ -38,24 +38,7 @@ class WebList(object):
         assert(args.srctype == 'web')
         url = url_val if 'http' in url_val else (helper.domain_url() + url_val)
         self.html, e = net.get_html(url, cookies, helper.domain_url(), form_data)
-        if self.html == '':
-            if e.message == 'The service is unavailable.':
-                helper.log_debug('The service is unavailable.')
-                helper.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
-            elif e.message == "You're browsing too fast! Please slow down.":
-                helper.log_debug('Got the browsing too fast error 1.')
-                helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
-            else:
-                helper.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
-                helper.show_error_dialog([
-                    'Failed to parse the KissAnime website.',
-                    'Please see the error below.  If it has to do with HTTP exception 503, KissAnime may be down; in that case, try again later.',
-                    ('Error details: %s' % str(e))
-                    ])
-        elif self.html == "You're browsing too fast! Please slow down.":
-            helper.log_debug('Got the browsing too fast error.')
-            helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
-            self.html = ''
+        self.html = helper.print_html_errors(self.html, e)
         helper.log_debug('HTML is %sempty' % ('' if self.html == '' else 'not '))
         
         self.html = self._filter_html(self.html)

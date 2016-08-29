@@ -19,11 +19,11 @@
 
 
 from resources.lib.common import args, constants
-from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list
+from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list, bookmarklist
 from resources.lib.players import videoplayer, autoplayer
 from resources.lib.common.helpers import helper
 from resources.lib.metadata import metadatafinder
-from resources.lib.appdata import lastvisited
+from resources.lib.appdata import account, lastvisited
 
 
 class Controller:
@@ -124,3 +124,18 @@ class Controller:
         else:
             helper.show_ok_dialog(['Visit an anime to populate this directory'], 'Last Anime Visited not set')
         helper.end('show_last_visited')
+
+    def _account_operation(self, fn, fn_args=None):
+        if account.Account().login():
+            fn(fn_args) if fn_args else fn()
+        else:
+            helper.show_error_dialog(['Failed to access account bookmarks.  Please login if you have not already.'])
+
+    def show_bookmark_list(self):
+        self._account_operation(self._show_list, bookmarklist.BookmarkList())
+
+    def add_bookmark(self):
+        self._account_operation(account.Account().add_bookmark)
+
+    def remove_bookmark(self):
+        self._account_operation(account.Account().remove_bookmark)

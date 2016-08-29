@@ -39,9 +39,9 @@ def init():
 
     # Make sure the cookies exist
     if not os.path.exists(cookies):
-        _f = xbmcvfs.File(cookies, 'w')
-        _f.write('#LWP-Cookies-2.0\n')
-        _f.close()
+        cookiesfile = xbmcvfs.File(cookies, 'w')
+        cookiesfile.write('#LWP-Cookies-2.0\n')
+        cookiesfile.close()
 
     return cookies, net
 
@@ -197,6 +197,7 @@ class NetHelper(Net):
         html = ''
         try:
             self.set_cookies(cookies)
+            helper.log_debug('Performing a %s operation' % ('POST' if form_data else 'GET'))
             if form_data:
                 html = self.http_POST(url, form_data, headers={'Referer':referer}).content
             else:
@@ -208,13 +209,18 @@ class NetHelper(Net):
             return ('', e)
         except Exception as e:
             return ('', e)
-        except:
-            return ('', None)
 
         if len(html) > 0:
             self.save_cookies(cookies)
         
         return (html, None)
+
+    def refresh_cookies(self):
+        if xbmcvfs.exists(cookies):
+            xbmcvfs.delete(cookies)
+        cookiesfile = xbmcvfs.File(cookies, 'w')
+        cookiesfile.write('#LWP-Cookies-2.0\n')
+        cookiesfile.close()
 
 
 cookies, net = init()
