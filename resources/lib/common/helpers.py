@@ -86,6 +86,11 @@ class Helper(Addon):
     def refresh_page(self):
         xbmc.executebuiltin('Container.Refresh')
 
+    def show_yes_no_dialog(self, msg, title=None):
+        if not title:
+            title = self.get_name()
+        return xbmcgui.Dialog().yesno(title, msg)
+
     def present_selection_dialog(self, title, options):
         dialog = xbmcgui.Dialog()
         return dialog.select(title, options)

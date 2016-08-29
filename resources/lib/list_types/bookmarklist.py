@@ -40,6 +40,7 @@ class BookmarkList(MediaContainerList):
 
         helper.end('BookmarkList.parse')
 
+    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
     def _get_contextmenu_items(self, url, name, metadata, media_type):
         items = MediaContainerList._get_contextmenu_items(self, url, name, metadata, media_type)
         remove_id = self.bookmark_dict[name]

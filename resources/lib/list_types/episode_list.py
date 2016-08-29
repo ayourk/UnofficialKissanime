@@ -83,6 +83,9 @@ class EpisodeList(WebList):
                 if has_class and link.next_sibling.next_sibling['class'][0] == u'line':
                     break
 
+        # Grab bookmark ID
+        self.bookmark_id = self.html.split('animeID=')[1].split('"')[0]
+
         # Sort episodes in ascending order by default
         self.links.reverse()
 
@@ -179,6 +182,9 @@ class EpisodeList(WebList):
         mclist = media_container_list.MediaContainerList(None)
         mclist.links = self.related_links
         mclist.add_items(title_prefix='Related: ')
+
+        query = self._construct_query(self.bookmark_id, 'toggleBookmark')
+        helper.add_directory(query, {'title':'Toggle bookmark'})
 
         helper.add_sort_methods(['title'])
         helper.end_of_directory()

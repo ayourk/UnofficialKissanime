@@ -168,12 +168,14 @@ class MediaContainerList(WebList):
     ''' PROTECTED FUNCTIONS '''
     def _get_contextmenu_items(self, url, name, metadata, media_type):
         contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+
         find_metadata_query = self._construct_query(url, 'findmetadata', metadata, name)
         find_metadata_context_item = constants.runplugin % helper.build_plugin_url(find_metadata_query)
         if meta.is_metadata_empty(metadata, media_type):
             contextmenu_items.append(('Find metadata', find_metadata_context_item))
         else:
             contextmenu_items.append(('Fix metadata', find_metadata_context_item))
+
         return contextmenu_items
 
     ''' PRIVATE FUNCTIONS '''

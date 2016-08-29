@@ -51,11 +51,27 @@ class Account(object):
     def logout(self):
         net.refresh_cookies()
 
+    def is_in_bookmark_list(self, id=args.value):
+        url = helper.domain_url() + 'CheckBookmarkStatus'
+        html, e = net.get_html(url, cookies, helper.domain_url(), {'animeId':id})
+        helper.print_html_errors(html, e)
+        if html == '':
+            return None
+        elif html == 'null':
+            return False
+        else:
+            return True
+
+    def toggle_bookmark(self):
+        self.remove_bookmark() if self.is_in_bookmark_list() else self.add_bookmark()
+
     def add_bookmark(self):
         self._perform_bookmark_operation(True)
 
     def remove_bookmark(self):
-        self._perform_bookmark_operation(False)
+        proceed = helper.show_yes_no_dialog('Are you sure you want to remove the show from your bookmarks?')
+        if proceed:
+            self._perform_bookmark_operation(False)
 
     # if add == False, remove, otherwise add
     def _perform_bookmark_operation(self, add):
@@ -64,7 +80,10 @@ class Account(object):
         bookmark_id = args.value
         url = '%sBookmark/%s/%s' % (helper.domain_url(), bookmark_id, 'add' if add else 'remove')
         html, e = net.get_html(url, cookies, helper.domain_url(), {'no-op':0})
-        helper.print_html_errors(html, e)
+        html = helper.print_html_errors(html, e)
         helper.close_busy_notification()
-        helper.refresh_page()
+        if html != '':
+            helper.refresh_page()
+            msg = 'Successfully %s the bookmark list' % ('added to' if add else 'removed from')
+            helper.show_ok_dialog([msg])
         helper.end('Account._perform_bookmark_operation')

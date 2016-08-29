@@ -56,6 +56,8 @@ elif args.action == 'addBookmark':
     controller.Controller().add_bookmark()
 elif args.action == 'removeBookmark':
     controller.Controller().remove_bookmark()
+elif args.action == 'toggleBookmark':
+    controller.Controller().toggle_bookmark()
 else:
     helper.log_error("WHAT HAVE YOU DONE?")
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])

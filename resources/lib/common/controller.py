@@ -139,3 +139,6 @@ class Controller:
 
     def remove_bookmark(self):
         self._account_operation(account.Account().remove_bookmark)
+
+    def toggle_bookmark(self):
+        self._account_operation(account.Account().toggle_bookmark)
