@@ -104,7 +104,7 @@ class EpisodeList(WebList):
             return 'movie'
 
         # 1.2) We have a special, let's handle just use the season 0 data along with the show banner
-        if ('(OVA)' in args.full_mc_name or ' Specials' in args.full_mc_name or
+        if 'OVA' in self.genres or ('(OVA)' in args.full_mc_name or ' Specials' in args.full_mc_name or
             re.search('( OVA)( \(((Sub)|(Dub))\))?$', args.full_mc_name) != None or
             re.search(' (Special)$', args.full_mc_name) != None):
             helper.log_debug('|COUNT|OVA| %s' % args.full_mc_name)
@@ -204,7 +204,7 @@ class EpisodeList(WebList):
             return []
         
         all_metadata = self.meta.get_episodes_meta(name, args.imdb_id, args.tvdb_id, self.num_episodes,
-                                              self.first_air_date, self.season)
+                                                   self.first_air_date, self.season)
 
         return all_metadata
 

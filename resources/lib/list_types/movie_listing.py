@@ -50,10 +50,18 @@ class MovieListing(EpisodeList):
         for link in self.links:
             name = link.string.strip()
             url = link['href']
-            metadata = self._get_metadata(args.base_mc_name)
+            if self.mismatch:
+                metadata = self._get_metadata(self._clean_name(args.full_mc_name))
+                if self.meta.is_metadata_empty(metadata, 'movie'):
+                    metadata = self._get_metadata(args.base_mc_name)
+            else:
+                metadata = self._get_metadata(args.base_mc_name)
             query = self._construct_query(url, action, metadata)
-            helper.add_directory(query, metadata, img=args.icon, fanart=args.fanart, is_folder=is_folder)
+            metadata['title'] = name
+            contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+            helper.add_directory(query, metadata, img=args.icon, fanart=args.fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
 
+        helper.set_content('movies')
         helper.end_of_directory()
         helper.end('MovieListing.add_items')
         return
@@ -66,7 +74,7 @@ class MovieListing(EpisodeList):
         # If we have no previous metadata, and this isn't a mismatch, then
         # we've already had a legitimate try with no luck.
         if not self.mismatch and (args.imdb_id == None and args.tmdb_id == None):
-            helper.log_debug('1')
+            helper.log_debug('Not a mismatch and no previous results for movie')
             return {}
         
         imdb_id = args.imdb_id if args.imdb_id and not self.mismatch else ''

@@ -177,6 +177,9 @@ class LooseMetaData(MetaData):
         if not tvdb_id:
             tvdb_id = self._get_tvdb_id(tvshowtitle, imdb_id)
 
+        if season:
+            season = int(season)
+
         # Look up in cache first
         meta_list = self._cache_lookup_episodes(imdb_id, tvdb_id, first_air_date, season, num_episodes)
 
@@ -297,7 +300,7 @@ class LooseMetaData(MetaData):
                       'WHERE episode_meta.tvdb_id = tvshow_meta.tvdb_id AND '
                       'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ? '
                       'ORDER BY episode_meta.absolute_episode ASC '
-                      'GROUP BY TVShowTitle')
+                      'GROUP BY episode_meta.absolute_episode')
         helper.log_debug('SQL select: %s with params %s' % (sql_select, (tvdb_id, first_ep, last_ep)))
         try:
             self.dbcur.execute(sql_select, (tvdb_id, first_ep, last_ep))
@@ -308,11 +311,6 @@ class LooseMetaData(MetaData):
 
         if matchedrows == None:
             return []
-
-        # Because 2 shows in the tvshow meta can have the same tvdb ID (eg, 
-        # Fairy Tail and Fairy Tail (2014)), we need to filter out duplicates.
-        if len(matchedrows) / num_episodes > 1:
-            matchedrows = matchedrows[:num_episodes]
 
         meta_list = []
         for row in matchedrows:
@@ -326,22 +324,25 @@ class LooseMetaData(MetaData):
         Save metadata of multiple episodes to local cache db.
         '''
         if meta_list[0]['imdb_id']:
-            sql_select = 'SELECT * from episode_meta WHERE imdb_id = "%s"' % meta_list[0]['imdb_id']
-            sql_delete = 'DELETE * from episode_meta WHERE imdb_id = "%s"' % meta_list[0]['imdb_id']
+            data = (meta_list[0]['imdb_id'], )
+            sql_select = 'SELECT * from episode_meta WHERE imdb_id=?'
+            sql_delete = 'DELETE from episode_meta WHERE imdb_id=?'
         elif meta_list[0]['tvdb_id']:
-            sql_select = 'SELECT * from episode_meta WHERE tvdb_id = "%s"' % meta_list[0]['tvdb_id']
-            sql_delete = 'DELETE * from episode_meta WHERE tvdb_id = "%s"' % meta_list[0]['tvdb_id']
+            data = (meta_list[0]['tvdb_id'], )
+            sql_select = 'SELECT * from episode_meta WHERE tvdb_id=?'
+            sql_delete = 'DELETE from episode_meta WHERE tvdb_id=?'
         else:
-            sql_select = 'SELECT * from episode_meta WHERE title = "%s"' % self._clean_string(meta_list[0]['title'].tolower())
-            sql_delete = 'DELETE * from episode_meta WHERE title = "%s"' % self._clean_string(meta_list[0]['title'].tolower())
-        helper.log_debug('SQL Select: %s' % sql_select)
+            data = (self._clean_string(meta_list[0]['title'].tolower()), )
+            sql_select = 'SELECT * from episode_meta WHERE title=?'
+            sql_delete = 'DELETE from episode_meta WHERE title=?'
+        helper.log_debug('SQL Select: %s with params %s' % (sql_select, data))
 
         try:
-            self.dbcur.execute(sql_select)
+            self.dbcur.execute(sql_select, data)
             matchedrow = self.dbcur.fetchone()
             if matchedrow:
-                helper.log_debug('SQL Delete: %s' % sql_delete)
-                self.dbcur.execute(sql_delete)
+                helper.log_debug('SQL Delete: %s with params %s' % (sql_delete, data))
+                self.dbcur.execute(sql_delete, data)
         except Exception as e:
             helper.log_debug('************* Error attempting to delete episodes from cache table: %s ' % e)
             pass
