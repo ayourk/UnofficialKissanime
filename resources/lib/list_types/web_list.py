@@ -18,10 +18,9 @@
 '''
 
 
-import re, urllib
-from resources.lib.common import args, constants
+import re
+from resources.lib.common import args
 from resources.lib.common.helpers import helper
-from resources.lib.common.nethelpers import net, cookies
 from bs4 import BeautifulSoup
 
 
@@ -32,12 +31,17 @@ class WebList(object):
         self.links = []
         self.has_next_page = False
 
+        from resources.lib.metadata.loose_metahandlers import meta
+        self.meta = meta
+        from resources.lib.common.nethelpers import net, cookies
+        self.net, self.cookies = net, cookies
+
         if not url_val:
             return
 
         assert(args.srctype == 'web')
         url = url_val if 'http' in url_val else (helper.domain_url() + url_val)
-        self.html, e = net.get_html(url, cookies, helper.domain_url(), form_data)
+        self.html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
         self.html = helper.print_html_errors(self.html, e)
         helper.log_debug('HTML is %sempty' % ('' if self.html == '' else 'not '))
         

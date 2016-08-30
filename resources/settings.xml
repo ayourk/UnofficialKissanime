@@ -8,4 +8,8 @@
         <setting id="username" label="Username" type="text" default=""/>
         <setting id="password" label="password" type="text" default="" option="hidden"/>
     </category>
+    <category label="Debug">
+        <setting id="debug-import" label="Enable to import everything at once (Affects performance)" type="bool" default="false"/>
+        <setting id="debug-timestamp" label="Enable to turn on timestampping for benchmarking functions" type="bool" default="false"/>
+    </category>
 </settings>

@@ -41,6 +41,12 @@ class Helper(Addon):
     def end(self, msg):
         self.log_debug("----END  : " + msg)
 
+    def debug_timestamp(self):
+        return (helper.get_setting('debug-timestamp') == 'true')
+
+    def debug_import(self):
+        return (helper.get_setting('debug-import') == 'true')
+
     # AKA youve_got_to_be_kidding_me
     def get_datetime(self, date_str, format):
         if not date_str:

@@ -18,7 +18,6 @@
 '''
 
 
-import urlresolver
 from resources.lib.common.helpers import helper
 
 
@@ -27,6 +26,7 @@ class VideoPlayer:
         self.link = self._decode(url)
 
     def play(self):
+        import urlresolver
         url = urlresolver.resolve(self.link)
         helper.resolve_url(url)
 

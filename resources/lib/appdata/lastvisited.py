@@ -18,14 +18,14 @@
 '''
 
 
-import os
-from sqlite3 import dbapi2 as database
 from resources.lib.common.helpers import helper
 from resources.lib.common import constants, args
 
 
 class LastVisited(object):
     def __init__(self, *args, **kwargs):
+        import os
+        from sqlite3 import dbapi2 as database
         db_path = os.path.join(helper.get_profile(), constants.appdata_cache_path)
         self.dbcon = database.connect(db_path)
         self.dbcon.row_factory = database.Row

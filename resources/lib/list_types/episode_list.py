@@ -18,16 +18,13 @@
 '''
 
 
-import re, time
+import re
 from datetime import datetime
 from resources.lib.common import args
 from resources.lib.common.helpers import helper
-from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.web_list import WebList
-from bs4 import BeautifulSoup
-
-
 from resources.lib.list_types import media_container_list
+from bs4 import BeautifulSoup
 
 
 class EpisodeList(WebList):
@@ -84,7 +81,10 @@ class EpisodeList(WebList):
                     break
 
         # Grab bookmark ID
-        self.bookmark_id = self.html.split('animeID=')[1].split('"')[0]
+        if 'animeID=' in self.html:
+            self.bookmark_id = self.html.split('animeID=')[1].split('"')[0]
+        else:
+            self.bookmark_id = None
 
         # Sort episodes in ascending order by default
         self.links.reverse()
@@ -183,8 +183,9 @@ class EpisodeList(WebList):
         mclist.links = self.related_links
         mclist.add_items(title_prefix='Related: ')
 
-        query = self._construct_query(self.bookmark_id, 'toggleBookmark')
-        helper.add_directory(query, {'title':'Toggle bookmark'})
+        if self.bookmark_id != None:
+            query = self._construct_query(self.bookmark_id, 'toggleBookmark')
+            helper.add_directory(query, {'title':'Toggle bookmark'})
 
         helper.add_sort_methods(['title'])
         helper.end_of_directory()
@@ -197,7 +198,7 @@ class EpisodeList(WebList):
             (args.imdb_id == None and args.tvdb_id == None)):
             return []
         
-        all_metadata = meta.get_episodes_meta(name, args.imdb_id, args.tvdb_id, self.num_episodes,
+        all_metadata = self.meta.get_episodes_meta(name, args.imdb_id, args.tvdb_id, self.num_episodes,
                                               self.first_air_date, self.season)
 
         return all_metadata
@@ -208,7 +209,7 @@ class EpisodeList(WebList):
         if helper.get_setting('enable-metadata') == 'false':
             return None, ''
 
-        season_covers = meta.get_seasons(args.base_mc_name, args.imdb_id, ['0'])
+        season_covers = self.meta.get_seasons(args.base_mc_name, args.imdb_id, ['0'])
         if len(season_covers) > 0:
             icon = season_covers[0]['cover_url']
             fanart = season_covers[0]['backdrop_url']

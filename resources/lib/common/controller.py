@@ -19,17 +19,15 @@
 
 
 from resources.lib.common import args, constants
-from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list, bookmarklist
-from resources.lib.players import videoplayer, autoplayer
 from resources.lib.common.helpers import helper
-from resources.lib.metadata import metadatafinder
 from resources.lib.appdata import account, lastvisited
 
 
 class Controller:
     def main_menu(self):
         helper.start('main_menu')
-        local_list.LocalList().add_directories(self._get_main_menu_src())
+        from resources.lib.list_types.local_list import LocalList
+        LocalList().add_directories(self._get_main_menu_src())
         helper.end('main_menu')
         return
 
@@ -46,12 +44,14 @@ class Controller:
 
     def show_list(self):
         helper.start("show_list")
-        local_list.LocalList().add_directories(constants.ui_table[args.value])
+        from resources.lib.list_types.local_list import LocalList
+        LocalList().add_directories(constants.ui_table[args.value])
         helper.end("show_list")
         return
 
     def _show_list(self, list):
         list.parse()
+        from resources.lib.list_types import episode_list, specials_list, movie_listing
         if isinstance(list, episode_list.EpisodeList):
             actual_media_type = list.get_actual_media_type() if args.media_type == 'tvshow' else args.media_type
             if actual_media_type != 'tvshow':
@@ -66,26 +66,30 @@ class Controller:
     # series and/or movies
     def show_media_container_list(self):
         helper.start('show_media_container_list')
-        self._show_list(media_container_list.MediaContainerList())
+        from resources.lib.list_types.media_container_list import MediaContainerList
+        self._show_list(MediaContainerList())
         helper.end('show_media_container_list')
         return
 
     def show_media_list(self):
         helper.start('show_media_list')
-        self._show_list(episode_list.EpisodeList())
+        from resources.lib.list_types.episode_list import EpisodeList
+        self._show_list(EpisodeList())
         lastvisited.LastVisited().update_last_anime_visited()
         helper.end('show_media_list')
         return
 
     def show_quality(self):
         helper.start('show_quality')
-        self._show_list(quality_list.QualityList())
+        from resources.lib.list_types.quality_list import QualityList
+        self._show_list(QualityList())
         helper.end('show_quality')
         return
 
     def auto_play(self):
         helper.start('auto_play')
-        player = autoplayer.AutoPlayer()
+        from resources.lib.players.autoplayer import AutoPlayer
+        player = AutoPlayer()
         player.parse()
         player.add_items()
         player.play()        
@@ -93,7 +97,8 @@ class Controller:
 
     def play_video(self):
         helper.start('play_video')
-        player = videoplayer.VideoPlayer(args.value)
+        from resources.lib.players.videoplayer import VideoPlayer
+        player = VideoPlayer(args.value)
         player.play()
         helper.end('play_video')
 
@@ -104,12 +109,14 @@ class Controller:
             url = helper.domain_url() + 'AdvanceSearch'
             form_data = {'animeName':search_string, 'genres':'0', 'status':''}
             helper.log_debug('Searching for show using url %s and form data %s' % (url, str(form_data)))
-            self._show_list(media_container_list.MediaContainerList(url, form_data))
+            from resources.lib.list_types.media_container_list import MediaContainerList
+            self._show_list(MediaContainerList(url, form_data))
         helper.end('search')
 
     def find_metadata(self):
         helper.start('find_metadata')
-        finder = metadatafinder.MetadataFinder()
+        from resources.lib.metadata.metadatafinder import MetadataFinder
+        finder = MetadataFinder()
         finder.search_and_update()
         helper.end('find_metadata')
 
@@ -132,7 +139,8 @@ class Controller:
             helper.show_error_dialog(['Failed to access account bookmarks.  Please login if you have not already.'])
 
     def show_bookmark_list(self):
-        self._account_operation(self._show_list, bookmarklist.BookmarkList())
+        from resources.lib.list_types.bookmarklist import BookmarkList
+        self._account_operation(self._show_list, BookmarkList())
 
     def add_bookmark(self):
         self._account_operation(account.Account().add_bookmark)

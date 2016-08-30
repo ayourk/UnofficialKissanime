@@ -19,7 +19,6 @@
 
 
 from resources.lib.common import args
-from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.common.helpers import helper
 from resources.lib.list_types import episode_list, media_container_list
 
@@ -27,11 +26,11 @@ from resources.lib.list_types import episode_list, media_container_list
 class MetadataFinder(object):
     def __init__(self):
         helper.show_busy_notification()
+        from resources.lib.metadata.loose_metahandlers import meta
+        self.meta = meta
         self.ep_list = episode_list.EpisodeList()
         self.ep_list.parse()
-        self.options = self.ep_list.aliases
-        self.options.insert(0, 'Manual search')
-        self.options.insert(1, args.base_mc_name)
+        self.options = ['Manual search', args.base_mc_name] + self.ep_list.aliases
         helper.close_busy_notification()
 
     def search_and_update(self):
@@ -52,7 +51,7 @@ class MetadataFinder(object):
         metadata, media_type = media_container_list.MediaContainerList(None)._get_metadata(search_string)
         if metadata.get('tvdb_id', ''):
             helper.log_debug('Found metadata from search for %s; refreshing the page ' % args.base_mc_name)
-            meta.update_meta(media_type, args.base_mc_name, imdb_id='', new_tmdb_id=metadata.get('tvdb_id'), new_imdb_id=metadata.get('imdb_id'), )
+            self.meta.update_meta(media_type, args.base_mc_name, imdb_id='', new_tmdb_id=metadata.get('tvdb_id'), new_imdb_id=metadata.get('imdb_id'), )
             helper.refresh_page()
         else:
             helper.show_ok_dialog(['Did not find any metadata from the search query.  Please try again.'])

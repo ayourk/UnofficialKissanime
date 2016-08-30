@@ -19,13 +19,13 @@
 
 
 from resources.lib.common.helpers import helper
-from resources.lib.common.nethelpers import net, cookies
 from resources.lib.common import args
 
 
 class Account(object):
     def __init__(self):
-        pass
+        from resources.lib.common.nethelpers import net, cookies
+        self.net, self.cookies = net, cookies
 
     def login(self):
         username = helper.get_setting('username')
@@ -34,7 +34,7 @@ class Account(object):
             return False
 
         username_and_password = 0
-        for cookie in net._cj:
+        for cookie in self.net._cj:
             if cookie.name.lower() == 'username' or cookie.name.lower() == 'password':
                 username_and_password += 1
         if username_and_password == 2:
@@ -43,17 +43,17 @@ class Account(object):
         # Log in through the page
         url = helper.domain_url() + 'Login'
         form_data = {'username': username, 'password': password, 'chkRemember': 1}
-        html, e = net.get_html(url, cookies, helper.domain_url(), form_data)
+        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
         html = helper.print_html_errors(html, e)
 
         return (len(html) > 0)
 
     def logout(self):
-        net.refresh_cookies()
+        self.net.refresh_cookies()
 
     def is_in_bookmark_list(self, id=args.value):
         url = helper.domain_url() + 'CheckBookmarkStatus'
-        html, e = net.get_html(url, cookies, helper.domain_url(), {'animeId':id})
+        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), {'animeId':id})
         helper.print_html_errors(html, e)
         if html == '':
             return None
@@ -79,7 +79,7 @@ class Account(object):
         helper.show_busy_notification()
         bookmark_id = args.value
         url = '%sBookmark/%s/%s' % (helper.domain_url(), bookmark_id, 'add' if add else 'remove')
-        html, e = net.get_html(url, cookies, helper.domain_url(), {'no-op':0})
+        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), {'no-op':0})
         html = helper.print_html_errors(html, e)
         helper.close_busy_notification()
         if html != '':

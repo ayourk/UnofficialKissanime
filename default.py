@@ -18,17 +18,21 @@
 '''
 
 
-# DEBUG
 import time
 t_start = time.time()
 
-
 from resources.lib.common.helpers import helper
-from resources.lib.common import controller
-from resources.lib.common import args
+from resources.lib.common import args, controller, timestamper
 
-
+timestamper = timestamper.TimeStamper('default.py', t0=t_start, t1_msg='Default imports')
 helper.location("Default entry point")
+
+if helper.debug_import():
+    from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list, bookmarklist
+    from resources.lib.players import videoplayer, autoplayer
+    from resources.lib.metadata import metadatafinder
+    from resources.lib.metadata.loose_metahandlers import meta
+    timestamper.stamp('Importing everything else')
 
 if args.action == None:
     controller.Controller().main_menu()
@@ -63,6 +67,4 @@ else:
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])
 
 helper.location("Default exit point")
-
-t_end = time.time()
-helper.log_notice('TIMER - TOTAL TIME: %f' % (t_end - t_start))
+timestamper.stamp_and_dump('All non-imported execution')

@@ -21,24 +21,17 @@
 import re
 from resources.lib.common import args, constants, threadpool
 from resources.lib.common.helpers import helper
-from resources.lib.metadata.loose_metahandlers import meta
 from resources.lib.list_types.web_list import WebList
+from resources.lib.common.timestamper import TimeStamper
 from bs4 import BeautifulSoup
-
-
-
-# DEBUG
-import time
-
 
 
 class MediaContainerList(WebList):
     def __init__(self, url_val=args.value, form_data=None):
-        t0 = time.time()
+        timestamper = TimeStamper('MediaContainerList.init')
         WebList.__init__(self, url_val, form_data)
         self.has_next_page = False
-        t1 = time.time()
-        helper.log_notice('TIMER - MEDIACONTAINERLIST.INIT: %f' % (t1 - t0))
+        timestamper.stamp_and_dump()
 
     ''' PUBLIC FUNCTIONS '''
     def parse(self):
@@ -46,12 +39,11 @@ class MediaContainerList(WebList):
         if self.soup == None:
             return
 
-        t0 = time.time()
+        timestamper = TimeStamper('MediaContainerList.parse')
         table = self.soup.find('table', class_='listing')
         if table == None:
             self.links = self.__parse_upcoming()
-            t1 = time.time()
-            helper.log_notice('TIMER - MEDIACONTAINERLIST.PARSE: %f' % (t1 - t0))
+            timestamper.stamp_and_dump()
             return
         
         self.links = table.find_all('a', {'href':re.compile('\/Anime\/')})
@@ -66,8 +58,7 @@ class MediaContainerList(WebList):
                 self.links.append(page_links[-1])
                 self.has_next_page = True
         helper.end('MediaContainerList.parse')
-        t1 = time.time()
-        helper.log_notice('TIMER - MEDIACONTAINERLIST.PARSE: %f' % (t1 - t0))
+        timestamper.stamp_and_dump()
 
     def worker(self, tuple):
         (name, url, idx) = tuple
@@ -77,7 +68,7 @@ class MediaContainerList(WebList):
     # If title_prefix is not None, then assume we are being included inline 
     # and let the caller handle setting the content type and ending the directory
     def add_items(self, title_prefix=None):
-        t0 = time.time()
+        timestamper = TimeStamper('MediaContainerList.add_items')
         end_dir = title_prefix == None
         title_prefix = title_prefix if title_prefix else ''
         if not end_dir:
@@ -85,7 +76,6 @@ class MediaContainerList(WebList):
         iter_links = self.links[:-2] if self.has_next_page else self.links
 
         # Filter out the episode links for ongoing series
-        t1 = time.time()
         mc_links = []
         idx = 0
         for link in iter_links:
@@ -94,13 +84,14 @@ class MediaContainerList(WebList):
                 continue
             mc_links.append((link.string.strip(), url, idx))
             idx += 1
-        t2 = time.time()
-        helper.log_notice('TIMER - MEDIACONTAINERLIST.ADD_ITEMS - initial loop: %f' % (t2 - t1))
+        timestamper.stamp('Initial loop')
 
         self.links_with_metadata = [None] * idx
         pool = threadpool.ThreadPool(4)
         pool.map(self.worker, mc_links)
         pool.wait_completion()
+
+        timestamper.stamp('Grabbing metadata with threads')
 
         for (name, url, metadata, media_type) in self.links_with_metadata:
             icon, fanart = self._get_art_from_metadata(metadata)
@@ -122,8 +113,7 @@ class MediaContainerList(WebList):
 
         if end_dir:
             helper.end_of_directory()
-        t_end = time.time()
-        helper.log_notice('TIMER - MEDIACONTAINERLIST.ADD_ITEMS: %f' % (t_end - t0))
+        timestamper.stamp_and_dump('Adding all items')
 
 
     ''' OVERRIDDEN PROTECTED FUNCTIONS '''
@@ -132,37 +122,25 @@ class MediaContainerList(WebList):
         if helper.get_setting('enable-metadata') == 'false' or name == 'Next' or name == 'Last':
             return {}, ''
 
-        t0 = time.time()
-
         name_for_movie_search = self._clean_name(name)
         name_for_tv_search = self.__clean_tv_show_name(name_for_movie_search)
         media_type = 'tvshow'
 
         # Not sure if movie or tv show; try tv show first
-        metadata = meta.get_meta('tvshow', name_for_tv_search)#, year=year)
+        metadata = self.meta.get_meta('tvshow', name_for_tv_search)#, year=year)
         helper.log_debug('Got metadata %s for show %s' % (metadata, name_for_tv_search))
-        t1 = time.time()
-        t2, t3, t4 = t1, t1, t1
         # It may be a movie, so let's try that with the general cleaned name
         if metadata['tvdb_id'] == '':
-            metadata = meta.get_meta('movie', name_for_movie_search)#, year=year)
-            t2 = time.time()
+            metadata = self.meta.get_meta('movie', name_for_movie_search)#, year=year)
             # If movie failed, and if there was a year in the name, try tv without it
             if metadata['tmdb_id'] == '' and re.search('( \([12][0-9]{3}\))$', name_for_tv_search) != None:
-                metadata = meta.get_meta('tvshow', name_for_tv_search[:-7], update=True)
-                t3 = time.time()
+                metadata = self.meta.get_meta('tvshow', name_for_tv_search[:-7], update=True)
                 if metadata['imdb_id'] != '':
-                    metadata = meta.update_meta('tvshow', name_for_tv_search, imdb_id='', new_imdb_id=metadata['imdb_id'])
-                    t4 = time.time()
+                    metadata = self.meta.update_meta('tvshow', name_for_tv_search, imdb_id='', new_imdb_id=metadata['imdb_id'])
             elif metadata['tmdb_id'] != '': # otherwise we found a move
                 media_type = 'movie'
 
         helper.end('MediaContainerList._get_metadata')
-
-        t_end = time.time()
-        helper.log_notice('TIMER - MEDIACONTAINERLIST._GET_METADTA - TOTAL:%f, TV:%f, MOVIE:%f, YEAR:%f, UPDATE:%f' %
-                          (t_end-t0, t1-t0, t2-t1, t3-t2, t4-t3))
-
         return (metadata, media_type)
 
     ''' PROTECTED FUNCTIONS '''
@@ -171,7 +149,7 @@ class MediaContainerList(WebList):
 
         find_metadata_query = self._construct_query(url, 'findmetadata', metadata, name)
         find_metadata_context_item = constants.runplugin % helper.build_plugin_url(find_metadata_query)
-        if meta.is_metadata_empty(metadata, media_type):
+        if self.meta.is_metadata_empty(metadata, media_type):
             contextmenu_items.append(('Find metadata', find_metadata_context_item))
         else:
             contextmenu_items.append(('Fix metadata', find_metadata_context_item))
