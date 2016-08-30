@@ -43,7 +43,9 @@ class EpisodeList(WebList):
         if self.soup == None:
             return
 
-        self.links = self.soup.find('table', class_='listing').find_all('a')
+        # Note that there are some lists/listings that do not have any episodes (!)
+        table = self.soup.find('table', class_='listing')
+        self.links = table.find_all('a') if table else []
         spans = self.soup.find_all('span', class_='info')
         helper.log_debug('# of links found: %d' % len(self.links))
 
@@ -71,20 +73,22 @@ class EpisodeList(WebList):
             self.aliases = [link.string for link in alias_links if filter(f, link.string) == u'']
             helper.log_debug('Found the aliases: %s' % str(self.aliases))
 
+        # Grab the related links and the bookmark ID
         rightboxes = self.soup.find('div', id='rightside').find_all('div', class_='rightBox')
         if len(rightboxes) > 1:
             related = rightboxes[1].find('div', class_='barContent').find_all('a')
             for link in related:
                 self.related_links.append(link)
-                has_class = dict(link.next_sibling.next_sibling.attrs).has_key('class')
-                if has_class and link.next_sibling.next_sibling['class'][0] == u'line':
-                    break
+                # Sometimes the related container includes episodes which are 
+                # dead links.  This is the best way to filter them out.
+                try:
+                    has_class = dict(link.next_sibling.next_sibling.attrs).has_key('class')
+                    if has_class and link.next_sibling.next_sibling['class'][0] == u'line':
+                        break
+                except:
+                    pass
 
-        # Grab bookmark ID
-        if 'animeID=' in self.html:
-            self.bookmark_id = self.html.split('animeID=')[1].split('"')[0]
-        else:
-            self.bookmark_id = None
+        self.bookmark_id = self.html.split('animeID=')[1].split('"')[0] if 'animeID=' in self.html else None
 
         # Sort episodes in ascending order by default
         self.links.reverse()
@@ -179,9 +183,10 @@ class EpisodeList(WebList):
                 helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
 
         # Add related links using the MCL (since they're all media containers)
-        mclist = media_container_list.MediaContainerList(None)
-        mclist.links = self.related_links
-        mclist.add_items(title_prefix='Related: ')
+        if len(self.related_links) > 0:
+            mclist = media_container_list.MediaContainerList(None)
+            mclist.links = self.related_links
+            mclist.add_items(title_prefix='Related: ')
 
         if self.bookmark_id != None:
             query = self._construct_query(self.bookmark_id, 'toggleBookmark')

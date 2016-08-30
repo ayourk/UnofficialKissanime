@@ -61,10 +61,13 @@ class LastVisited(object):
             '(id, action, srctype, value, icon, fanart, full_mc_name, base_mc_name, '\
             'imdb_id, tvdb_id, tmdb_id, media_type) '\
             'VALUES (' + (', '.join('?' * 12)) + ')'
+        # Be sure to decode the names which may contain funky characters!
+        full_mc_name = args.full_mc_name.decode('utf8')
+        base_mc_name = args.base_mc_name.decode('utf8')
         data = (id, args.action, args.srctype, args.value, args.icon, args.fanart,
-                args.full_mc_name, args.base_mc_name, args.imdb_id, args.tvdb_id,
-                args.tmdb_id, args.media_type)
-        helper.log_debug('SQL INSERT OR REPLACE: %s' % sql_update)
+                full_mc_name, base_mc_name, args.imdb_id, args.tvdb_id, args.tmdb_id, 
+                args.media_type)
+        helper.log_debug('SQL INSERT OR REPLACE: %s with params %s' % (sql_update, str(data)))
         self.dbcur.execute(sql_update, data)
         self.dbcon.commit()
 

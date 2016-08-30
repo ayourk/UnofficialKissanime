@@ -35,7 +35,10 @@ class SpecialsList(EpisodeList):
             self.first_air_date = episode_list.first_air_date
             self.season = episode_list.season
             self.num_episodes = episode_list.num_episodes
-
+            from resources.lib.metadata.loose_metahandlers import meta
+            self.meta = meta
+            from resources.lib.common.nethelpers import net, cookies
+            self.net, self.cookies = net, cookies
 
     ''' PUBLIC FUNCTIONS '''
     def add_items(self):

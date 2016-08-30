@@ -37,6 +37,10 @@ class MovieListing(EpisodeList):
             self.season = episode_list.season
             self.num_episodes = episode_list.num_episodes
             self.mismatch = mismatch
+            from resources.lib.metadata.loose_metahandlers import meta
+            self.meta = meta
+            from resources.lib.common.nethelpers import net, cookies
+            self.net, self.cookies = net, cookies
         
     def add_items(self):
         helper.start('MovieListing.add_items')
