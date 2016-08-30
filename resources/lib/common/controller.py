@@ -132,15 +132,18 @@ class Controller:
             helper.show_ok_dialog(['Visit an anime to populate this directory'], 'Last Anime Visited not set')
         helper.end('show_last_visited')
 
-    def _account_operation(self, fn, fn_args=None):
-        if account.Account().login():
-            fn(fn_args) if fn_args else fn()
+    def _account_operation(self, fn):
+        if account.Account().is_logged_in():
+            fn()
         else:
             helper.show_error_dialog(['Failed to access account bookmarks.  Please login if you have not already.'])
 
     def show_bookmark_list(self):
-        from resources.lib.list_types.bookmarklist import BookmarkList
-        self._account_operation(self._show_list, BookmarkList())
+        if account.Account().is_logged_in():
+            from resources.lib.list_types.bookmarklist import BookmarkList
+            self._show_list(BookmarkList())
+        else:
+            helper.show_error_dialog(['Failed to access account bookmarks.  Please login if you have not already.'])
 
     def add_bookmark(self):
         self._account_operation(account.Account().add_bookmark)
@@ -150,3 +153,6 @@ class Controller:
 
     def toggle_bookmark(self):
         self._account_operation(account.Account().toggle_bookmark)
+
+    def account_login_logout(self):
+        account.Account().log_in_or_out()

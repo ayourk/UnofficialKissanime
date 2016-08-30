@@ -76,8 +76,8 @@ class Helper(Addon):
             if self.sort_method_dict.has_key(m):
                 xbmcplugin.addSortMethod(self.handle, self.sort_method_dict[m])
 
-    def get_user_input(self, title='', default_text=''):
-        keyboard = xbmc.Keyboard('', title)
+    def get_user_input(self, title='', default_text='', hidden=False):
+        keyboard = xbmc.Keyboard('', title, hidden)
         if default_text:
             keyboard.setDefault(default_text)
         keyboard.doModal()

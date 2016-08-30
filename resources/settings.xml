@@ -5,8 +5,7 @@
         <setting id="http-type" label="Select HTTP type" type="labelenum" values="http|https" default="http"/>
     </category>
     <category label="Account">
-        <setting id="username" label="Username" type="text" default=""/>
-        <setting id="password" label="password" type="text" default="" option="hidden"/>
+        <setting id="username" label="Account" type="action" option="close" action="RunPlugin(plugin://plugin.video.unofficialkissanime/?action=account)"/>
     </category>
     <category label="Debug">
         <setting id="debug-import" label="Enable to import everything at once (Affects performance)" type="bool" default="false"/>

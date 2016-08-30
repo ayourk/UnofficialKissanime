@@ -27,29 +27,55 @@ class Account(object):
         from resources.lib.common.nethelpers import net, cookies
         self.net, self.cookies = net, cookies
 
-    def login(self):
+    def log_in_or_out(self):
+        if self.is_logged_in():
+            proceed = helper.show_yes_no_dialog('Are you sure you want to log out of your account?')
+            if proceed:
+                username = helper.get_setting('username')
+                self._logout()
+                helper.show_small_popup(msg=('Successfully logged out of %s' % username))
+        else:
+            username = helper.get_user_input('Please enter your username')
+            if username == None:
+                return
+
+            password = helper.get_user_input('Please enter your password', hidden=True)
+            if password == None:
+                return
+
+            helper.show_busy_notification()
+            logged_in = self._login(username, password)
+            msg = '%s into %s' % (('Successfully logged' if logged_in else 'Failed to log'), username)
+            helper.close_busy_notification()
+            helper.show_small_popup(msg=msg)
+
+    def _login(self, username, password):
+        url = helper.domain_url() + 'Login'
+        form_data = {'username': username, 'password': password, 'chkRemember': 1}
+        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
+        html = helper.print_html_errors(html, e)
+
+        logged_in = len(html) > 0
+        if logged_in:
+            helper.set_setting('username', username)
+
+        return logged_in
+    
+    def _logout(self):
+        self.net.refresh_cookies()
+        helper.set_setting('username', '')
+    
+    def is_logged_in(self):
         username = helper.get_setting('username')
-        password = helper.get_setting('password')
-        if len(username) == 0 or len(password) == 0:
+        if len(username) == 0:
             return False
 
         username_and_password = 0
         for cookie in self.net._cj:
             if cookie.name.lower() == 'username' or cookie.name.lower() == 'password':
                 username_and_password += 1
-        if username_and_password == 2:
-            return True
 
-        # Log in through the page
-        url = helper.domain_url() + 'Login'
-        form_data = {'username': username, 'password': password, 'chkRemember': 1}
-        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
-        html = helper.print_html_errors(html, e)
-
-        return (len(html) > 0)
-
-    def logout(self):
-        self.net.refresh_cookies()
+        return (username_and_password == 2)
 
     def is_in_bookmark_list(self, id=args.value):
         url = helper.domain_url() + 'CheckBookmarkStatus'
@@ -85,5 +111,5 @@ class Account(object):
         if html != '':
             helper.refresh_page()
             msg = 'Successfully %s the bookmark list' % ('added to' if add else 'removed from')
-            helper.show_ok_dialog([msg])
+            helper.show_small_popup(msg=msg)
         helper.end('Account._perform_bookmark_operation')

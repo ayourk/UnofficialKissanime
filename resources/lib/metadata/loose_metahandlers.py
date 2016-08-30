@@ -505,7 +505,7 @@ class LooseMetaData(MetaData):
         meta['title'] = show_name
         if str(show.rating) != '' and show.rating != None:
             meta['rating'] = float(show.rating)
-        meta['duration'] = int(show.runtime) * 60
+        meta['duration'] = int(show.runtime) * 60 if show.runtime else 0
         meta['plot'] = show.overview
         meta['mpaa'] = show.content_rating
         meta['premiered'] = str(show.first_aired)
@@ -642,7 +642,6 @@ class LooseMetaData(MetaData):
             return None
         return matchedrow
 
-    #TEST
     def _cache_lookup_by_id(self, media_type, imdb_id = '', tmdb_id = ''):
         self.lock.acquire()
         result = MetaData._cache_lookup_by_id(self, media_type, imdb_id, tmdb_id)
@@ -664,5 +663,11 @@ class LooseMetaData(MetaData):
         self.lock.acquire()
         MetaData._cache_delete_video_meta(self, media_type, imdb_id, tmdb_id, name, year)
         self.lock.release()
+
+    def _format_tmdb_meta(self, md, imdb_id, name, year):
+        if md.get('runtime', 0) == None:
+            md['runtime'] = 0
+        return MetaData._format_tmdb_meta(self, md, imdb_id, name, year)
+
 
 meta = init()
