@@ -48,10 +48,22 @@ class MetadataFinder(object):
                 break
 
         helper.show_busy_notification()
-        metadata, media_type = media_container_list.MediaContainerList(None)._get_metadata(search_string)
-        if metadata.get('tvdb_id', ''):
-            helper.log_debug('Found metadata from search for %s; refreshing the page ' % args.base_mc_name)
-            self.meta.update_meta(media_type, args.base_mc_name, imdb_id='', new_tmdb_id=metadata.get('tvdb_id'), new_imdb_id=metadata.get('imdb_id'), )
+        mc_list = media_container_list.MediaContainerList(None)
+        metadata, media_type = mc_list._get_metadata(search_string)
+
+        # Grab the ID and the actual title, which might have gotten stripped of
+        # the year because of a mismatch...
+        if media_type == 'tvshow':
+            tmdb_id = metadata.get('tvdb_id', '')
+            actual_title = mc_list._clean_tv_show_name(mc_list._clean_name(args.full_mc_name))
+        else:
+            tmdb_id = metadata.get('tmdb_id', '')
+            actual_title = mc_list._clean_name(args.full_mc_name)
+
+        helper.log_debug('Metadatafinder results: %s, %s, %s' % (tmdb_id, media_type, metadata))
+        if tmdb_id:
+            helper.log_debug('Found metadata from search for %s; refreshing the page' % args.base_mc_name)
+            self.meta.update_meta(media_type, actual_title, imdb_id='', new_tmdb_id=tmdb_id, new_imdb_id=metadata.get('imdb_id'))
             helper.refresh_page()
         else:
             helper.show_ok_dialog(['Did not find any metadata from the search query.  Please try again.'])

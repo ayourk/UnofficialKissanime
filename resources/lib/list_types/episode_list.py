@@ -158,7 +158,6 @@ class EpisodeList(WebList):
         self.num_episodes = len(episodes) + double_eps
         helper.log_debug('We have %d episodes' % self.num_episodes)
         action, is_folder = self._get_action_and_isfolder()
-        helper.set_content('episodes')
 
         all_metadata = self._get_metadata(args.base_mc_name)
         helper.log_debug('We have %d metadata entries' % len(all_metadata))
@@ -192,6 +191,7 @@ class EpisodeList(WebList):
             query = self._construct_query(self.bookmark_id, 'toggleBookmark')
             helper.add_directory(query, {'title':'Toggle bookmark'})
 
+        helper.set_content('episodes')
         helper.add_sort_methods(['title'])
         helper.end_of_directory()
         helper.end('EpisodeList.add_items')

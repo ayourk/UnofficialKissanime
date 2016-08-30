@@ -102,7 +102,7 @@ class MediaContainerList(WebList):
             query = self._construct_query(url, 'mediaList', metadata, name, media_type)
 
             contextmenu_items = self._get_contextmenu_items(url, name, metadata, media_type)
-            metadata['title'] = title_prefix + name # needed for sub and dub
+            metadata['title'] = title_prefix + name # adjust title for sub and dub
             helper.add_directory(query, metadata, img=icon, fanart=fanart, contextmenu_items=contextmenu_items, total_items=len(mc_links))
 
         if self.has_next_page:
@@ -123,7 +123,7 @@ class MediaContainerList(WebList):
             return {}, ''
 
         name_for_movie_search = self._clean_name(name)
-        name_for_tv_search = self.__clean_tv_show_name(name_for_movie_search)
+        name_for_tv_search = self._clean_tv_show_name(name_for_movie_search)
         media_type = 'tvshow'
 
         # Not sure if movie or tv show; try tv show first
@@ -172,7 +172,7 @@ class MediaContainerList(WebList):
             links.append(link)
         return links
 
-    def __clean_tv_show_name(self, name):
+    def _clean_tv_show_name(self, name):
         cleaned_name = name.replace(' (TV)', '').replace(' Second Season', '').replace(' 2nd Season', '')
         cleaned_name = self._strip_by_re(cleaned_name, '( Season [0-9])$', end=-9)
         cleaned_name = self._strip_by_re(cleaned_name, '( S[0-9])$', end=-3)

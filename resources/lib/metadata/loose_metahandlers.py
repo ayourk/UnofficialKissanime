@@ -224,6 +224,16 @@ class LooseMetaData(MetaData):
         helper.end('get_episodes_meta')
         return meta_list
 
+    def update_meta_to_nothing(self, media_type, title):
+        meta = self._cache_lookup_by_name(media_type, title)
+        if meta:
+            self._cache_delete_video_meta(media_type, '', '', title, '')
+
+        init_fn = self._init_tvshow_meta if media_type == 'tvshow' else self._init_movie_meta
+        meta = init_fn('', '', title)
+
+        self._cache_save_video_meta(meta, title, media_type)
+
     def _does_column_exist(self, column_name, table):
         sql_pragma = 'PRAGMA table_info(episode_meta)'
         try:
@@ -285,8 +295,9 @@ class LooseMetaData(MetaData):
                       'episode_meta.poster as cover_url ' 
                       'FROM episode_meta, tvshow_meta '
                       'WHERE episode_meta.tvdb_id = tvshow_meta.tvdb_id AND '
-                      'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ?'
-                      'ORDER BY episode_meta.absolute_episode ASC')
+                      'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ? '
+                      'ORDER BY episode_meta.absolute_episode ASC '
+                      'GROUP BY TVShowTitle')
         helper.log_debug('SQL select: %s with params %s' % (sql_select, (tvdb_id, first_ep, last_ep)))
         try:
             self.dbcur.execute(sql_select, (tvdb_id, first_ep, last_ep))
@@ -297,6 +308,11 @@ class LooseMetaData(MetaData):
 
         if matchedrows == None:
             return []
+
+        # Because 2 shows in the tvshow meta can have the same tvdb ID (eg, 
+        # Fairy Tail and Fairy Tail (2014)), we need to filter out duplicates.
+        if len(matchedrows) / num_episodes > 1:
+            matchedrows = matchedrows[:num_episodes]
 
         meta_list = []
         for row in matchedrows:

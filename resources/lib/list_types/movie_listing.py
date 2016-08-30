@@ -73,6 +73,10 @@ class MovieListing(EpisodeList):
         tmdb_id = args.tmdb_id if args.tmdb_id and not self.mismatch else ''
         should_update = self.mismatch
         metadata = self.meta.get_meta('movie', name, imdb_id, tmdb_id, update=should_update)
+
         # Update the tvshow cache to nothing for this name 
-        helper.log_debug('2: %s' % str(meta))
+        if self.mismatch:
+            self.meta.update_meta_to_nothing('tvshow', name)
+            helper.log_debug('Movie mismatch - new meta: %s' % str(self.meta))
+
         return metadata

@@ -58,7 +58,8 @@ class Controller:
                 if actual_media_type == 'special':
                     list = specials_list.SpecialsList(list)
                 elif actual_media_type == 'movie':
-                    list = movie_listing.MovieListing(list, mismatch=True)
+                    mismatch = (actual_media_type != args.media_type)
+                    list = movie_listing.MovieListing(list, mismatch=mismatch)
         list.add_items()
 
     # A media container is a series or movie; it links to the media listings 
