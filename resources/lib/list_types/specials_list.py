@@ -35,6 +35,8 @@ class SpecialsList(EpisodeList):
             self.first_air_date = episode_list.first_air_date
             self.season = episode_list.season
             self.num_episodes = episode_list.num_episodes
+            self.bookmark_id = episode_list.bookmark_id
+            self.related_links = episode_list.related_links
             from resources.lib.metadata.loose_metahandlers import meta
             self.meta = meta
             from resources.lib.common.nethelpers import net, cookies
@@ -53,6 +55,9 @@ class SpecialsList(EpisodeList):
             metadata = self._get_metadata(name)
             query = self._construct_query(url, action, metadata)
             helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
+
+        self._add_related_links()
+        self._add_bookmark_link()
 
         helper.end_of_directory()
         helper.end('SpecialsList.add_items')

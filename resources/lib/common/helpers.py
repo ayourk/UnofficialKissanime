@@ -47,6 +47,9 @@ class Helper(Addon):
     def debug_import(self):
         return (helper.get_setting('debug-import') == 'true')
 
+    def debug_metadata_threads(self):
+        return (helper.get_setting('debug-metadata-threads') == 'true')
+
     # AKA youve_got_to_be_kidding_me
     def get_datetime(self, date_str, format):
         if not date_str:
@@ -60,7 +63,13 @@ class Helper(Addon):
             return datetime(*(time.strptime(date_str, format)[0:6]))
 
     def log(self, msg, level=xbmc.LOGNOTICE):
-        msg = unicodedata.normalize('NFKD', unicode(msg)).encode('ascii', 'ignore')
+        # Some strings will be unicode, and some of those will already be 
+        # encoded.  This try/except tries to account for that.
+        try:
+            unicode_msg = unicode(msg)
+        except:
+            unicode_msg = msg.decode('utf8')
+        msg = unicodedata.normalize('NFKD', unicode_msg).encode('ascii', 'ignore')
         Addon.log(self, msg, level)
 
     def set_content(self, content_type):

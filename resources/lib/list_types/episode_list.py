@@ -18,7 +18,7 @@
 '''
 
 
-import re
+import re, unicodedata
 from datetime import datetime
 from resources.lib.common import args
 from resources.lib.common.helpers import helper
@@ -144,7 +144,11 @@ class EpisodeList(WebList):
         for link in self.links:
             name = link.string.strip()
             url = link['href']
-            name_minus_show = name.replace(args.full_mc_name, '')
+            if isinstance(name, unicode):
+                ascii_name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
+            else:
+                ascii_name = name
+            name_minus_show = ascii_name.replace(args.full_mc_name, '')
             if re.search('( .?Special ([0-9]?){0,2}[0-9])$', name) != None:
                 specials.append((name, url))
             elif 'recap' in name_minus_show.lower() or '.5' in name_minus_show:
@@ -181,15 +185,8 @@ class EpisodeList(WebList):
                 query = self._construct_query(url, action, metadata)
                 helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
 
-        # Add related links using the MCL (since they're all media containers)
-        if len(self.related_links) > 0:
-            mclist = media_container_list.MediaContainerList(None)
-            mclist.links = self.related_links
-            mclist.add_items(title_prefix='Related: ')
-
-        if self.bookmark_id != None:
-            query = self._construct_query(self.bookmark_id, 'toggleBookmark')
-            helper.add_directory(query, {'title':'Toggle bookmark'})
+        self._add_related_links()
+        self._add_bookmark_link()
 
         helper.set_content('episodes')
         helper.add_sort_methods(['title'])
@@ -228,6 +225,18 @@ class EpisodeList(WebList):
         action = 'quality' if select_quality else 'autoplay'
         is_folder = select_quality # Display a folder if we have to select the quality
         return action, is_folder
+
+    def _add_related_links(self):
+        # Add related links using the MCL (since they're all media containers)
+        if len(self.related_links) > 0:
+            mclist = media_container_list.MediaContainerList(None)
+            mclist.links = self.related_links
+            mclist.add_items(title_prefix='Related: ')
+
+    def _add_bookmark_link(self):
+        if self.bookmark_id != None:
+            query = self._construct_query(self.bookmark_id, 'toggleBookmark')
+            helper.add_directory(query, {'title':'Toggle bookmark'})
 
     ''' PRIVATE FUNCTIONS '''
     def __determine_season(self):

@@ -438,10 +438,10 @@ class LooseMetaData(MetaData):
 
         # If we still haven't found anything, let's try IMDB to see if we can find a show
         if tvdb_id == '' and imdb_id == '':
+            helper.log_debug("No match, so let's try IMDB")
             tmdb = TMDB(api_key=self.tmdb_api_key, lang=self._MetaData__get_tmdb_language())
             imdb_meta = tmdb.search_imdb(name)
-            helper.log_debug('Found IMDB result with metadata %s' % str(imdb_meta))
-            helper.log_debug('imdbID: %s | %s|' % (imdb_meta.get('imdbID', ''), str('tt' in imdb_meta.get('imdbID', ''))))
+            helper.log_debug('IMDB metadata result: %s' % str(imdb_meta))
             if imdb_meta and 'tt' in imdb_meta.get('imdbID', ''):
                 media_type = imdb_meta.get('Type', '')
                 if media_type == 'series':

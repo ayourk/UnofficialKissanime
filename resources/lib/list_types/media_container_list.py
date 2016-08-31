@@ -87,7 +87,7 @@ class MediaContainerList(WebList):
         timestamper.stamp('Initial loop')
 
         self.links_with_metadata = [None] * idx
-        pool = threadpool.ThreadPool(4)
+        pool = threadpool.ThreadPool(4 if not helper.debug_metadata_threads() else 1)
         pool.map(self.worker, mc_links)
         pool.wait_completion()
 

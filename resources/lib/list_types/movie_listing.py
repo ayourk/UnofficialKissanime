@@ -36,6 +36,8 @@ class MovieListing(EpisodeList):
             self.first_air_date = episode_list.first_air_date
             self.season = episode_list.season
             self.num_episodes = episode_list.num_episodes
+            self.bookmark_id = episode_list.bookmark_id
+            self.related_links = episode_list.related_links
             self.mismatch = mismatch
             from resources.lib.metadata.loose_metahandlers import meta
             self.meta = meta
@@ -60,6 +62,9 @@ class MovieListing(EpisodeList):
             metadata['title'] = name
             contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
             helper.add_directory(query, metadata, img=args.icon, fanart=args.fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
+
+        self._add_related_links()
+        self._add_bookmark_link()
 
         helper.set_content('movies')
         helper.end_of_directory()

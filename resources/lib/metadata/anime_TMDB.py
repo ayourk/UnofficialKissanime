@@ -18,11 +18,16 @@
 '''
 
 
+import unicodedata
 from metahandler.TMDB import TMDB
+from resources.lib.common.helpers import helper
 
 
 class AnimeTMDB(TMDB):
     def tmdb_lookup(self, name, imdb_id='', tmdb_id='', year=''):
+        if isinstance(name, unicode):
+            name = unicodedata.normalize('NFKD', unicode(name)).encode('ascii', 'ignore')
+
         if imdb_id or tmdb_id:
             return TMDB.tmdb_lookup(self, name, imdb_id, tmdb_id, year)
 
@@ -52,6 +57,8 @@ class AnimeTMDB(TMDB):
         return TMDB.tmdb_lookup(self, name, imdb_id, tmdb_id, year)
 
     def search_imdb(self, name, imdb_id='', year=''):
+        if isinstance(name, unicode):
+            name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
         name = self._TMDB__clean_name(name)
         return TMDB.search_imdb(self, name, imdb_id, year)
 
@@ -63,7 +70,7 @@ class AnimeTMDB(TMDB):
                 for i in range(len(word)):
                     if(word[i].isalnum()):              
                         w += word[i]
-                    # Replace no alpha-numeric chars with a space
+                    # Replace non-alpha-numeric chars with a space
                     else:
                         w += ' '
                 word = w
