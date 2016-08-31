@@ -53,7 +53,7 @@ class Account(object):
         url = helper.domain_url() + 'Login'
         form_data = {'username': username, 'password': password, 'chkRemember': 1}
         html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
-        html = helper.print_html_errors(html, e)
+        html = helper.handle_html_errors(html, e)
 
         logged_in = len(html) > 0
         if logged_in:
@@ -80,7 +80,7 @@ class Account(object):
     def is_in_bookmark_list(self, id=args.value):
         url = helper.domain_url() + 'CheckBookmarkStatus'
         html, e = self.net.get_html(url, self.cookies, helper.domain_url(), {'animeId':id})
-        helper.print_html_errors(html, e)
+        helper.handle_html_errors(html, e)
         if html == '':
             return None
         elif html == 'null':
@@ -106,7 +106,7 @@ class Account(object):
         bookmark_id = args.value
         url = '%sBookmark/%s/%s' % (helper.domain_url(), bookmark_id, 'add' if add else 'remove')
         html, e = self.net.get_html(url, self.cookies, helper.domain_url(), {'no-op':0})
-        html = helper.print_html_errors(html, e)
+        html = helper.handle_html_errors(html, e)
         helper.close_busy_notification()
         if html != '':
             helper.refresh_page()

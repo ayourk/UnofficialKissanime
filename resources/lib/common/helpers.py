@@ -116,25 +116,29 @@ class Helper(Addon):
     def domain_url(self):
         return ('%s://%s/' % (self.get_setting('http-type'), constants.domain))
 
-    def print_html_errors(self, html, e):
+    def handle_html_errors(self, html, e):
         if html == '':
             if e.message == 'The service is unavailable.':
-                helper.log_debug('The service is unavailable.')
-                helper.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
+                self.log_debug('The service is unavailable.')
+                self.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
             elif e.message == "You're browsing too fast! Please slow down.":
-                helper.log_debug('Got the browsing too fast error 1.')
-                helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
+                self.log_debug('Got the browsing too fast error 1.')
+                self.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
             else:
-                helper.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
-                helper.show_error_dialog([
+                self.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
+                self.show_error_dialog([
                     'Failed to parse the KissAnime website.',
                     'Please see the error below.  If it has to do with HTTP exception 503, KissAnime may be down; in that case, try again later.',
                     ('Error details: %s' % str(e))
                     ])
         elif html == "You're browsing too fast! Please slow down.":
-            helper.log_debug('Got the browsing too fast error.')
-            helper.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
-            return ''
+            self.log_debug('Got the browsing too fast error.')
+            self.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
+            html = ''
+        elif html == 'Not found':
+            self.log_debug('Navigated to a dead page')
+            self.show_error_dialog(['This page does not exist.', '', 'If you clicked on a related link, KissAnime sometimes autogenerates related links which do not exist.'])
+            html = ''
 
         return html
 

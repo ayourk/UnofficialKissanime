@@ -153,6 +153,8 @@ class EpisodeList(WebList):
                 specials.append((name, url))
             elif 'recap' in name_minus_show.lower() or '.5' in name_minus_show:
                 specials.append((name, url))
+            elif 'preview' in name_minus_show.lower():
+                specials.append((name, url))
             elif re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None:
                 double_eps += 1
                 episodes.append((name, url))

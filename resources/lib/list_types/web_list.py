@@ -42,7 +42,7 @@ class WebList(object):
         assert(args.srctype == 'web')
         url = url_val if 'http' in url_val else (helper.domain_url() + url_val)
         self.html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
-        self.html = helper.print_html_errors(self.html, e)
+        self.html = helper.handle_html_errors(self.html, e)
         helper.log_debug('HTML is %sempty' % ('' if self.html == '' else 'not '))
         
         self.html = self._filter_html(self.html)
