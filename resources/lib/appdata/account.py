@@ -19,7 +19,7 @@
 
 
 from resources.lib.common.helpers import helper
-from resources.lib.common import args
+from resources.lib.common.args import args
 
 
 class Account(object):

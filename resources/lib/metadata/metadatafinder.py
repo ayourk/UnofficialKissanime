@@ -18,7 +18,7 @@
 '''
 
 
-from resources.lib.common import args
+from resources.lib.common.args import args
 from resources.lib.common.helpers import helper
 from resources.lib.list_types import episode_list, media_container_list
 

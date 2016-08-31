@@ -19,7 +19,8 @@
 
 
 from resources.lib.common.helpers import helper
-from resources.lib.common import constants, args
+from resources.lib.common import constants
+from resources.lib.common.args import args
 
 
 class LastVisited(object):
@@ -51,7 +52,7 @@ class LastVisited(object):
 
     def __get_row(self, id):
         sql_select = 'SELECT * FROM last_visited WHERE id=?'
-        helper.log_debug('SQL SELECT: %s' % sql_select)
+        helper.log_debug('SQL SELECT: %s with params: %s' % (sql_select, id))
         self.dbcur.execute(sql_select, (id, ))
         matchedrow = self.dbcur.fetchone()
         return dict(matchedrow) if matchedrow else None

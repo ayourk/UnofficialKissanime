@@ -19,7 +19,8 @@
 
 
 import re
-from resources.lib.common import args, constants, threadpool
+from resources.lib.common import constants, threadpool
+from resources.lib.common.args import args
 from resources.lib.common.helpers import helper
 from resources.lib.list_types.web_list import WebList
 from resources.lib.common.timestamper import TimeStamper

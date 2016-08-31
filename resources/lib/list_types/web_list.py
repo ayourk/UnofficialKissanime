@@ -19,7 +19,7 @@
 
 
 import re
-from resources.lib.common import args
+from resources.lib.common.args import args
 from resources.lib.common.helpers import helper
 from bs4 import BeautifulSoup
 

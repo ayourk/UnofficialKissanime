@@ -18,7 +18,8 @@
 '''
 
 
-from resources.lib.common import args, constants
+from resources.lib.common import constants
+from resources.lib.common.args import args
 from resources.lib.common.helpers import helper
 from resources.lib.appdata import account, lastvisited
 
@@ -128,7 +129,9 @@ class Controller:
         helper.start('show_last_visited')
         last_show_queries = lastvisited.LastVisited().get_last_anime_visited()
         if last_show_queries:
-            helper.go_to_page_using_queries(last_show_queries)
+            args.override(last_show_queries)
+            from resources.lib.list_types.episode_list import EpisodeList
+            self._show_list(EpisodeList())
         else:
             helper.show_ok_dialog(['Visit an anime to populate this directory'], 'Last Anime Visited not set')
         helper.end('show_last_visited')

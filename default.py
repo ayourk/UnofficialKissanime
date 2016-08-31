@@ -22,7 +22,8 @@ import time
 t_start = time.time()
 
 from resources.lib.common.helpers import helper
-from resources.lib.common import args, controller, timestamper
+from resources.lib.common.args import args
+from resources.lib.common import controller, timestamper
 
 timestamper = timestamper.TimeStamper('default.py', t0=t_start, t1_msg='Default imports')
 helper.location("Default entry point")
