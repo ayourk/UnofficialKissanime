@@ -18,7 +18,7 @@
 '''
 
 
-import sys, time, unicodedata, xbmc, xbmcplugin, xbmcgui
+import sys, time, unicodedata, urllib2, xbmc, xbmcplugin, xbmcgui
 from datetime import datetime
 from addon.common.addon import Addon
 from resources.lib.common import constants
@@ -128,11 +128,14 @@ class Helper(Addon):
                 self.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
             else:
                 self.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
-                self.show_error_dialog([
-                    'Failed to parse the KissAnime website.',
-                    'Please see the error below.  If it has to do with HTTP exception 503, KissAnime may be down; in that case, try again later.',
-                    ('Error details: %s' % str(e))
-                    ])
+                if isinstance(e, urllib2.HTTPError) and e.code == 503:
+                    self.show_error_dialog(['The service is currently unavailable.', '', 'If it does not respond after 1 more try, the site may be temporarily down.'])
+                else:
+                    self.show_error_dialog([
+                        'Failed to parse the KissAnime website.',
+                        '',
+                        ('Error details: %s' % str(e))
+                        ])
         elif html == "You're browsing too fast! Please slow down.":
             self.log_debug('Got the browsing too fast error.')
             self.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
