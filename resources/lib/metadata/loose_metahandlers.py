@@ -299,8 +299,8 @@ class LooseMetaData(MetaData):
                       'FROM episode_meta, tvshow_meta '
                       'WHERE episode_meta.tvdb_id = tvshow_meta.tvdb_id AND '
                       'episode_meta.tvdb_id = ? AND episode_meta.absolute_episode BETWEEN ? and ? '
-                      'ORDER BY episode_meta.absolute_episode ASC '
-                      'GROUP BY episode_meta.absolute_episode')
+                      'GROUP BY episode_meta.absolute_episode '
+                      'ORDER BY episode_meta.absolute_episode ASC')
         helper.log_debug('SQL select: %s with params %s' % (sql_select, (tvdb_id, first_ep, last_ep)))
         try:
             self.dbcur.execute(sql_select, (tvdb_id, first_ep, last_ep))

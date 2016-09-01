@@ -95,3 +95,4 @@ plugin.video.unofficialkissanime.zip
 /UnofficialKissanime.sln
 /resources/lib/common/api.py
 *.zip
+*cmd

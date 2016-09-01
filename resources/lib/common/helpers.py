@@ -68,7 +68,10 @@ class Helper(Addon):
         if isinstance(msg, str):
             unicode_msg = unicode(msg)
         elif isinstance(msg, unicode):
-            unicode_msg = msg.decode('utf8')
+            try:
+                unicode_msg = msg.decode('utf8')
+            except:
+                unicode_msg = msg.encode('utf8').decode('utf8')
         else:
             unicode_msg = msg
         msg = unicodedata.normalize('NFKD', unicode_msg).encode('ascii', 'ignore')
