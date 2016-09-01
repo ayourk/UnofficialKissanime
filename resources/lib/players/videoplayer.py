@@ -23,12 +23,14 @@ from resources.lib.common.helpers import helper
 
 class VideoPlayer:
     def __init__(self, url=''):
-        self.link = self._decode(url)
+        helper.log_debug('Initializing VideoPlayer with url: %s' % url)
+        self.link = url
 
     def play(self):
         import urlresolver
         url = urlresolver.resolve(self.link)
+        helper.log_debug("UrlResolver's resolved link: %s" % url)
         helper.resolve_url(url)
 
-    def _decode(self, url):
+    def decode(self, url):
         return url.decode('base-64') if url else ''

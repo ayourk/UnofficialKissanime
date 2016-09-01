@@ -43,4 +43,4 @@ class AutoPlayer(QualityList, VideoPlayer):
             helper.log_debug('No matching quality found; using the lowest available')
             url_to_play = encoded_links[-1]['value']
 
-        self.link = self._decode(url_to_play)
+        self.link = self.decode(url_to_play)

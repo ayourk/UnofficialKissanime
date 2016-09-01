@@ -65,10 +65,12 @@ class Helper(Addon):
     def log(self, msg, level=xbmc.LOGNOTICE):
         # Some strings will be unicode, and some of those will already be 
         # encoded.  This try/except tries to account for that.
-        try:
+        if isinstance(msg, str):
             unicode_msg = unicode(msg)
-        except:
+        elif isinstance(msg, unicode):
             unicode_msg = msg.decode('utf8')
+        else:
+            unicode_msg = msg
         msg = unicodedata.normalize('NFKD', unicode_msg).encode('ascii', 'ignore')
         Addon.log(self, msg, level)
 
