@@ -1,4 +1,4 @@
-# UKAP:The Unofficial Kissanime Plugin
+# UKAP: The Unofficial Kissanime Plugin
 An unofficial KissAnime client for Kodi, designed with the Fire Stick, Fire TV, and Windows.
 
 ## Overview and Motivation
