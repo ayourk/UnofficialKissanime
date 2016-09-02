@@ -1,0 +1,7 @@
+v1.0.0 (2016-09-01)
+ - Initial version
+ - Browse through KissAnime's content
+ - Search for KissAnime's content
+ - Metadata support
+ - Log in and out of your KissAnime account to enjoy bookmarks with support for primitive management
+ - Quick access to the last show visited, with widget support
