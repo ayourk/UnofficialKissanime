@@ -1,3 +1,8 @@
+v1.0.1 (2016-09-08)
+ - Added a real icon and added fanart
+ - Forgot to update version in addon.xml
+ - Added support for adding TMDB API key in the settings
+
 v1.0.0 (2016-09-01)
  - Initial version
  - Browse through KissAnime's content

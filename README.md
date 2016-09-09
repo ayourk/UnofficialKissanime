@@ -60,7 +60,6 @@ Widgets (in supported skins) can be populated with any page of the plugin (minus
 
 ## Future plans
  - Add list support
- - Let users input their own TMDB API keys in the settings instead of creating their own common/api.py file with a tmdb_key variable
  - Investigate possible Trakt integration
  - Add a "Go to page" option for submenus under Browse
  - Sync watched status with the KissAnime website for logged in users

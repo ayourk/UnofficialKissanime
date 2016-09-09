@@ -6,6 +6,7 @@
     </category>
     <category label="Account">
         <setting id="username" label="Account" type="action" option="close" action="RunPlugin(plugin://plugin.video.unofficialkissanime/?action=account)"/>
+        <setting id="tmdb-api-key" label="TMDB API key" type="text"/>
     </category>
     <category label="Debug">
         <setting id="debug-import" label="Enable to import everything at once (affects performance)" type="bool" default="false"/>

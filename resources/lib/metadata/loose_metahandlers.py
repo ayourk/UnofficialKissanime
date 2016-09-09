@@ -76,15 +76,10 @@ class LooseMetaData(MetaData):
         '''
         # TMDB constants
         self.tmdb_image_url = ''
-        try:
-            from resources.lib.common import api
-            self.tmdb_api_key = api.tmdb_key
-        except:
-            self.tmdb_api_key = tmdb_api_key
-            pass
-
         self.path = helper.get_profile()
         self.cache_path = make_dir(self.path, 'meta_cache')
+        user_tmdb_key = helper.get_setting('tmdb-api-key')
+        self.tmdb_api_key = user_tmdb_key if user_tmdb_key != '' else tmdb_api_key
 
         if prepack_images:
             #create container working directory

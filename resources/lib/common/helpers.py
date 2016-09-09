@@ -50,6 +50,13 @@ class Helper(Addon):
     def debug_metadata_threads(self):
         return (helper.get_setting('debug-metadata-threads') == 'true')
 
+    def add_item(self, queries, infolabels, properties=None, contextmenu_items='', 
+                 context_replace=False, img='', fanart='', resolved=False, total_items=0, 
+                 playlist=False, item_type='video', is_folder=False):
+        if fanart == '':
+            fanart = self.addon.getAddonInfo('fanart')
+        return Addon.add_item(self, queries, infolabels, properties, contextmenu_items, context_replace, img, fanart, resolved, total_items, playlist, item_type, is_folder)
+
     # AKA youve_got_to_be_kidding_me
     def get_datetime(self, date_str, format):
         if not date_str:
