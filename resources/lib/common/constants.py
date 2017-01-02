@@ -22,7 +22,7 @@ import os, sys, xbmcvfs
 
 
 plugin_name = 'plugin.video.unofficialkissanime'
-domain = 'kissanime.to'
+domain = 'kissanime.ru'
 runplugin = 'XBMC.RunPlugin(%s)'
 appdata_cache_path = 'appdata.db'
 

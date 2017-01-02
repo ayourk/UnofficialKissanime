@@ -2,7 +2,7 @@
 An unofficial KissAnime client for Kodi, designed for the Fire Stick, Fire TV, and Windows.
 
 ## Overview and Motivation
-This plugin was made as a simpler alternative to the fantastic and feature-packed [KissAnime Kodi plugin](https://github.com/HIGHWAY99/repository.thehighway/tree/master/repo/plugin.video.kissanime), which itself is a Kodi front-end for the [KissAnime website](http://kissanime.to).
+This plugin was made as a simpler alternative to the fantastic and feature-packed [KissAnime Kodi plugin](https://github.com/HIGHWAY99/repository.thehighway/tree/master/repo/plugin.video.kissanime), which itself is a Kodi front-end for the [KissAnime website](http://kissanime.ru).
 
 This plugin hopes to improve over the original in a few key areas.
 

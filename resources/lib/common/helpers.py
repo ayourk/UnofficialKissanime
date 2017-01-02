@@ -50,6 +50,9 @@ class Helper(Addon):
     def debug_metadata_threads(self):
         return (helper.get_setting('debug-metadata-threads') == 'true')
 
+    def debug_dump_html(self):
+        return (helper.get_setting('debug-dump-html') == 'true')
+
     def add_item(self, queries, infolabels, properties=None, contextmenu_items='', 
                  context_replace=False, img='', fanart='', resolved=False, total_items=0, 
                  playlist=False, item_type='video', is_folder=False):

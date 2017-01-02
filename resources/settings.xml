@@ -12,5 +12,6 @@
         <setting id="debug-import" label="Enable to import everything at once (affects performance)" type="bool" default="false"/>
         <setting id="debug-timestamp" label="Enable to turn on timestampping for benchmarking functions" type="bool" default="false"/>
         <setting id="debug-metadata-threads" label="Enable to get metadata in serial (affects performance)" type="bool" default="false"/>
+        <setting id="debug-dump-html" label="Enable to dump HTML on load failure" type="bool" default="false"/>
     </category>
 </settings>

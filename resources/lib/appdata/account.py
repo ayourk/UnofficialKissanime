@@ -72,7 +72,7 @@ class Account(object):
 
         username_and_password = 0
         for cookie in self.net._cj:
-            if cookie.name.lower() == 'username' or cookie.name.lower() == 'password':
+            if cookie.name.lower() == 'usernamek' or cookie.name.lower() == 'passwordk':
                 username_and_password += 1
 
         return (username_and_password == 2)

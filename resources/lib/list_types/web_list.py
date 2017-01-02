@@ -44,6 +44,8 @@ class WebList(object):
         self.html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
         self.html = helper.handle_html_errors(self.html, e)
         helper.log_debug('HTML is %sempty' % ('' if self.html == '' else 'not '))
+        if helper.debug_dump_html():
+            helper.log_debug('HTML DUMP: %s' % self.html)
         
         self.html = self._filter_html(self.html)
         self.soup = BeautifulSoup(self.html) if self.html != '' else None

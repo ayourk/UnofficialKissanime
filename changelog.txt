@@ -1,3 +1,7 @@
+v1.0.2 (2017-01-02)
+ - Changed domain to kissanime.ru and updated username and password parameter names for logging in
+ - Added debug support for dumping HTML when page fails to load
+
 v1.0.1 (2016-09-08)
  - Added a real icon and added fanart
  - Forgot to update version in addon.xml
