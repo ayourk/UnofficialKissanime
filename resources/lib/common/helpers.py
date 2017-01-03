@@ -133,10 +133,10 @@ class Helper(Addon):
 
     def handle_html_errors(self, html, e):
         if html == '':
-            if e.message == 'The service is unavailable.':
+            if e.args[0] == 'The service is unavailable.':
                 self.log_debug('The service is unavailable.')
                 self.show_error_dialog(['Kissanime is reporting that their service is currently unavailable.','','Please try again later.'])
-            elif e.message == "You're browsing too fast! Please slow down.":
+            elif e.args[0] == "You're browsing too fast! Please slow down.":
                 self.log_debug('Got the browsing too fast error 1.')
                 self.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
             else:

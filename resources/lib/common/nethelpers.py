@@ -40,7 +40,6 @@ def init():
     # Make sure the cookies exist
     if not os.path.exists(cookies):
         cookiesfile = xbmcvfs.File(cookies, 'w')
-        cookiesfile.write('#LWP-Cookies-2.0\n')
         cookiesfile.close()
 
     return cookies, net
@@ -52,9 +51,14 @@ class NetHelper(Net):
         Credit goes to lambda.  The idea is to use a separate cookie jar to
         pass cloudflare's "challenge".
     '''
+
+    # PYTHON 2.6 BUG: ISSUE #5537 (http://bugs.python.org/issue5537)
+    # SWITCH TO MOZILLA COOKIE JAR FROM LWP COOKIE JAR
+    Net._cj = cookielib.MozillaCookieJar()
+    
     def __init__(self, cookie_file, cloudflare=False):
         Net.__init__(self, cookie_file=cookie_file)
-        self._cloudflare_jar = cookielib.LWPCookieJar()
+        self._cloudflare_jar = cookielib.MozillaCookieJar() # ISSUE #5537
         self._cloudflare = cloudflare
 
     def _fetch(self, url, form_data={}, headers={}, compression=True):
@@ -203,11 +207,15 @@ class NetHelper(Net):
             else:
                 html = self.http_GET(url, headers={'Referer':referer}).content
             if html != '':
+                helper.log_debug("Saving cookies")
                 self.save_cookies(cookies)
+            helper.log_debug("Operation complete")
             return (html, None)
         except urllib2.URLError as e: 
             return ('', e)
         except Exception as e:
+            if helper.debug_dump_html():
+                helper.log_debug("html response in exception: %s" % html)
             return ('', e)
 
         if len(html) > 0:
