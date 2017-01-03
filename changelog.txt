@@ -1,5 +1,6 @@
 v1.0.2 (2017-01-02)
  - Changed domain to kissanime.ru and updated username and password parameter names for logging in
+ - Fixed cookie bug, (Python issue #5537) in Fire OS 5.3.2.1, which prevented logging in and out for bookmark access
  - Added debug support for dumping HTML when page fails to load
 
 v1.0.1 (2016-09-08)
