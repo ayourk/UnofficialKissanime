@@ -129,7 +129,15 @@ class Controller:
         helper.start('show_last_visited')
         last_show_queries = lastvisited.LastVisited().get_last_anime_visited()
         if last_show_queries:
+            # The relative URL is stored in args, which is a parameter to WebList, the parent of
+            # EpisodeList.  We override args with the real relative URL.  When debug_import is on,
+            # we need to reload web_list because it's optional url_val parameter is already set to 
+            # the value of args.value at the add-on entry point, not at object creation.
             args.override(last_show_queries)
+            if helper.debug_import():
+                from resources.lib.list_types import episode_list, web_list
+                reload(web_list)
+                reload(episode_list)
             from resources.lib.list_types.episode_list import EpisodeList
             self._show_list(EpisodeList())
         else:

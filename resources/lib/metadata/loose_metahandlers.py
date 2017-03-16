@@ -162,7 +162,7 @@ class LooseMetaData(MetaData):
 
         At least one of tvdb_id and imdb_id must be given.
         '''
-        helper.start('get_episodes_meta')
+        helper.start('get_episodes_meta with params %s, imdb:%s, tvdb:%s, num_eps:%s, %s, season:%s' % (tvshowtitle, imdb_id, tvdb_id, num_episodes, first_air_date, season))
         if not imdb_id and not tvdb_id:
             helper.log_debug('Invalid imdb_id and tvdb_id')
             return []
@@ -196,8 +196,6 @@ class LooseMetaData(MetaData):
                             curr_abs_num += 1
                             m['absolute_episode'] = curr_abs_num
                     meta_list.append(m)
-                         
-                #meta_list = [self._episode_to_meta(ep, tvshowtitle, show) for ep in episode_list]
             else:
                 helper.log_debug('No TVDB ID available, could not find TV show with imdb: %s' % imdb_id)
                 tvdb_id = ''
@@ -209,15 +207,8 @@ class LooseMetaData(MetaData):
 
             self._cache_save_episodes_meta(meta_list)
 
-            # Filter out those that start before first_air_date/season (and 
-            # have no absolute number) and those that come after plus 
-            # num_episdoes
-            if first_air_date != '':
-                meta_list = self.__filter_meta_list_by_airdate(meta_list, first_air_date, num_episodes)
-            elif season != None:
-                meta_list = self.__filter_meta_list_by_season(meta_list, season, num_episodes)
-            else:
-                meta_list = [m for m in meta_list if m['absolute_episode'] != -1]
+            # Try again; the cache lookup will take care of any filtering needed
+            meta_list = self._cache_lookup_episodes(imdb_id, tvdb_id, first_air_date, season, num_episodes)
 
         helper.end('get_episodes_meta')
         return meta_list
@@ -635,7 +626,10 @@ class LooseMetaData(MetaData):
 
     def __cache_find_absolute_episode(self, tvdb_id, first_air_date, season):
         sql_select = 'SELECT absolute_episode FROM episode_meta WHERE tvdb_id=? AND '
-        if first_air_date != '':
+        if first_air_date != '' and season != None:
+            sql_select += 'premiered=? AND season=?'
+            params = (tvdb_id, first_air_date, season)
+        elif first_air_date != '':
             sql_select += 'premiered=?'
             params = (tvdb_id, first_air_date)
         elif season != None:
@@ -648,7 +642,14 @@ class LooseMetaData(MetaData):
         helper.log_debug('SQL select: %s with params %s' % (sql_select, params))
         try:
             self.dbcur.execute(sql_select, params)
-            matchedrow = self.dbcur.fetchone()
+            allrows = self.dbcur.fetchall()
+            matchedrow = allrows[0] if len(allrows) > 0 else None
+            if len(allrows) > 1:
+                for row in allrows:
+                    if row['absolute_episode'] > 0:
+                        matchedrow = row
+                        break
+
         except Exception, e:
             helper.log_debug('************* Error attempting to select from Episode table: %s ' % e)
             return None

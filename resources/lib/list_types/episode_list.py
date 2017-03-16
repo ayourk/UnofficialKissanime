@@ -127,7 +127,7 @@ class EpisodeList(WebList):
         # episodes.
         self.season = None
         if self.first_air_date == '':
-            # 3) If we don't have the air date, we will try out best to 
+            # 3) If we don't have the air date, we will try our best to 
             # determine which season this is based on the data we scraped
             self.season = self.__determine_season()
             if self.season == None:
