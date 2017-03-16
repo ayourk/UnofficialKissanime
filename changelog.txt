@@ -1,3 +1,6 @@
+v1.0.22 (2017-03-15)
+ - Updated README to include installation instructions
+
 v1.0.21 (2017-03-15)
  - Fixed id for HD quality list
  - Updated video player to decrypt URL before attempting to resolve
