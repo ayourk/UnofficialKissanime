@@ -123,7 +123,8 @@ main_menu = [
     ('Last Anime Visited', {'srctype':'web', 'value':'sql', 'action':'lastvisited'}),
     ('Browse', {'srctype':'local', 'value':'submenu_browse', 'action':'genericList'}),
     ('Bookmarks', {'srctype':'web', 'value':'BookmarkList', 'action':'bookmarkList'}),
-    ('Search', {'srctype': 'web', 'value':'dialog_search', 'action':'search'})
+    ('Search', {'srctype': 'web', 'value':'dialog_search', 'action':'search'}),
+    ('Settings', {'srctype': 'local', 'value':'settings', 'action':'settings'})
 ]
 
 ui_table = {

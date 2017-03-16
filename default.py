@@ -65,6 +65,8 @@ elif args.action == 'toggleBookmark':
     controller.Controller().toggle_bookmark()
 elif args.action == 'account':
     controller.Controller().account_login_logout()
+elif args.action == 'settings':
+    helper.show_settings()
 else:
     helper.log_error("WHAT HAVE YOU DONE?")
     helper.show_error_dialog(['Something went wrong.  Please restart the addon.'])
