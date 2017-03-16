@@ -51,7 +51,7 @@ class Account(object):
 
     def _login(self, username, password):
         url = helper.domain_url() + 'Login'
-        form_data = {'username': username, 'password': password, 'chkRemember': 1}
+        form_data = {'username': username, 'password': password}
         html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
         html = helper.handle_html_errors(html, e)
 

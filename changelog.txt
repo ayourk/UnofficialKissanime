@@ -1,3 +1,8 @@
+v1.0.21 (2017-03-15)
+ - Fixed id for HD quality list
+ - Updated video player to decrypt URL before attempting to resolve
+ - Added pyaes (https://github.com/ricmoo/pyaes) for this decryption
+
 v1.0.2 (2017-01-02)
  - Changed domain to kissanime.ru and updated username and password parameter names for logging in
  - Fixed cookie bug, (Python issue #5537) in Fire OS 5.3.2.1, which prevented logging in and out for bookmark access

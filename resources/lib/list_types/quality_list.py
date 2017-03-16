@@ -28,12 +28,21 @@ class QualityList(WebList):
         if self.soup == None:
             return
 
-        self.links = self.soup.find(id='selectQuality').find_all('option')
+        self.links = self.soup.find(id='slcQualix').find_all('option')
 
     def add_items(self):
+        from resources.lib import pyaes
+        key = '3353fbae49f94c2c62919cc10c526573ad65f0a79cfe3576b56ecdcd9571901d'.decode('hex')
+        iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
         for option in self.links:
             quality = option.string
-            link_val = option['value'].decode('base-64')
+            decoded_link_val = option['value'].decode('base-64')
+
+            decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
+            decrypted = decrypter.feed(decoded_link_val)
+            decrypted += decrypter.feed()
+            link_val = decrypted
+
             query = self._construct_query(link_val, 'play')
             helper.add_video_item(query, {'title':quality}, total_items=len(self.links))
         helper.end_of_directory()
