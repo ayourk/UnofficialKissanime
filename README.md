@@ -1,6 +1,9 @@
 # UKAP: The Unofficial KissAnime Plugin
 An unofficial KissAnime client for Kodi, designed for the Fire Stick, Fire TV, and Windows.
 
+## Installation
+Download the repo from [here](https://github.com/dat1guy/dat1guyRepository).  Once installed to Kodi, install the add-on from the repository from within Kodi.
+
 ## Overview and Motivation
 This plugin was made as a simpler alternative to the fantastic and feature-packed [KissAnime Kodi plugin](https://github.com/HIGHWAY99/repository.thehighway/tree/master/repo/plugin.video.kissanime), which itself is a Kodi front-end for the [KissAnime website](http://kissanime.ru).
 
