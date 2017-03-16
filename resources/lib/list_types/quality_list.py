@@ -36,13 +36,21 @@ class QualityList(WebList):
         iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
         for option in self.links:
             quality = option.string
-            decoded_link_val = option['value'].decode('base-64')
-
-            decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
-            decrypted = decrypter.feed(decoded_link_val)
-            decrypted += decrypter.feed()
-            link_val = decrypted
-
+            link_val = self.decode(option['value'])
             query = self._construct_query(link_val, 'play')
             helper.add_video_item(query, {'title':quality}, total_items=len(self.links))
         helper.end_of_directory()
+
+    def decode(self, url):
+        if not url:
+            return ''
+
+        from resources.lib import pyaes
+        key = '3353fbae49f94c2c62919cc10c526573ad65f0a79cfe3576b56ecdcd9571901d'.decode('hex')
+        iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
+        decoded_link_val = url.decode('base-64')
+        decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
+        decrypted_link_val = decrypter.feed(decoded_link_val)
+        decrypted_link_val += decrypter.feed()
+
+        return decrypted_link_val

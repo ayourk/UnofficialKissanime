@@ -50,6 +50,3 @@ class VideoPlayer:
 
         helper.log_debug("UrlResolver's resolved link: %s" % url)
         helper.resolve_url(url)
-
-    def decode(self, url):
-        return url.decode('base-64') if url else ''
