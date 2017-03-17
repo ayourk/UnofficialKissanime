@@ -30,13 +30,6 @@ def init():
     cookies = helper.get_profile() + 'cookies.txt'
     net = NetHelper(cookies, True)
 
-    # Make sure the profile path exists
-    if not os.path.exists(helper.get_profile()):
-        try:
-            xbmcvfs.mkdirs(helper.get_profile())
-        except:
-            os.mkdir(helper.get_profile())
-
     # Make sure the cookies exist
     if not os.path.exists(cookies):
         cookiesfile = xbmcvfs.File(cookies, 'w')

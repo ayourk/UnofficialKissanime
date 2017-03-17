@@ -1,3 +1,10 @@
+v1.0.24 (2017-03-16)
+ - Fixed initial start-up bug where the profile path was not created by the last visited function
+ - Added settings to main menu
+ - Fixed last visited item when the debug import option was enabled
+ - Fixed sorting error on initial download of tv episode metadata
+ - Fixed metadata cache lookup error that occurred when searching only by premiere date, resulting in multiple matches
+
 v1.0.23 (2017-03-15)
  - Fixed bug where autoplay did not decrypt the link
 

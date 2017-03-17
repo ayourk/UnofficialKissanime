@@ -18,9 +18,6 @@
 '''
 
 
-import os, sys, xbmcvfs
-
-
 plugin_name = 'plugin.video.unofficialkissanime'
 domain = 'kissanime.ru'
 runplugin = 'XBMC.RunPlugin(%s)'

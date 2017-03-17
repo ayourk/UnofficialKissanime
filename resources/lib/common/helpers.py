@@ -18,8 +18,7 @@
 '''
 
 
-import sys, time, unicodedata, urllib2, xbmc, xbmcplugin, xbmcgui
-from datetime import datetime
+import os, sys, unicodedata, xbmc, xbmcplugin, xbmcgui
 from addon.common.addon import Addon
 from resources.lib.common import constants
 
@@ -67,6 +66,9 @@ class Helper(Addon):
 
         if len(date_str) == 4:
             format = '%Y'
+
+        import time
+        from datetime import datetime
         try:
             return datetime.strptime(date_str, format)
         except TypeError:
@@ -140,6 +142,7 @@ class Helper(Addon):
                 self.log_debug('Got the browsing too fast error 1.')
                 self.show_error_dialog(["Kissanime is reporting that you're browsing too quickly.",'','Please wait a bit and slow down :)'])
             else:
+                import urllib2
                 self.log_debug('Failed to grab HTML' + ('' if e == None else ' with exception %s' % str(e)))
                 if isinstance(e, urllib2.HTTPError) and e.code == 503:
                     self.show_error_dialog(['The service is currently unavailable.', '', 'If it does not respond after 1 more try, the site may be temporarily down.'])
@@ -159,6 +162,16 @@ class Helper(Addon):
             html = ''
 
         return html
+
+    def get_profile(self):
+        profile_path = Addon.get_profile(self)
+        if not os.path.exists(profile_path):
+            import xbmcvfs
+            try:
+                xbmcvfs.mkdirs(profile_path)
+            except:
+                os.mkdir(profile_path)
+        return profile_path    
 
 
 helper = init()
