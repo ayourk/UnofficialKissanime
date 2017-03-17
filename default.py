@@ -35,6 +35,14 @@ if helper.debug_import():
     from resources.lib.metadata.loose_metahandlers import meta
     timestamper.stamp('Importing everything else')
 
+# Make sure the profile path exists
+if not os.path.exists(helper.get_profile()):
+    import xbmcvfs
+    try:
+        xbmcvfs.mkdirs(helper.get_profile())
+    except:
+        os.mkdir(helper.get_profile())
+
 if args.action == None:
     controller.Controller().main_menu()
 elif args.action == 'genericList':
