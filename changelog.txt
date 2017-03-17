@@ -1,3 +1,6 @@
+v1.0.25 (2017-03-17)
+ - Updated decryption key because of website changes
+
 v1.0.24 (2017-03-16)
  - Fixed initial start-up bug where the profile path was not created by the last visited function
  - Added settings to main menu
