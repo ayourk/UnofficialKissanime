@@ -26,7 +26,7 @@ from resources.lib.common.args import args
 from resources.lib.common import controller, timestamper
 
 timestamper = timestamper.TimeStamper('default.py', t0=t_start, t1_msg='Default imports')
-helper.location("Default entry point")
+helper.location("Default entry point, version %s" % helper.get_version())
 
 if helper.debug_import():
     from resources.lib.list_types import local_list, media_container_list, episode_list, movie_listing, specials_list, quality_list, bookmarklist

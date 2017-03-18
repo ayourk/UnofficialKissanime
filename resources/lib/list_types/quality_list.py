@@ -44,6 +44,8 @@ class QualityList(WebList):
 
         from resources.lib import pyaes
         key = '77523155af8cbed35649d6b9ad2f6a9596609be26cde24ee0334b80ae673b803'.decode('hex')
+        if (helper.debug_decrypt_key() != ''):
+            key = helper.debug_decrypt_key().decode('hex')
         iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
         decoded_link_val = url.decode('base-64')
         decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))

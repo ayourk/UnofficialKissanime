@@ -52,6 +52,9 @@ class Helper(Addon):
     def debug_dump_html(self):
         return (helper.get_setting('debug-dump-html') == 'true')
 
+    def debug_decrypt_key(self):
+        return (helper.get_setting('debug-decryption-key'))
+
     def add_item(self, queries, infolabels, properties=None, contextmenu_items='', 
                  context_replace=False, img='', fanart='', resolved=False, total_items=0, 
                  playlist=False, item_type='video', is_folder=False):

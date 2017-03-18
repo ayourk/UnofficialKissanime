@@ -1,3 +1,6 @@
+v1.0.26 (2017-03-17)
+ - Added an option in the settings to input the video link decryption key
+
 v1.0.25 (2017-03-17)
  - Updated decryption key because of website changes
 
