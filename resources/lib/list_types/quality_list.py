@@ -28,8 +28,23 @@ class QualityList(WebList):
         if self.soup == None:
             return
 
-        self.links = self.soup.find(id='slcQualix').find_all('option')
-
+        hasQuality = self.soup.find(id='slcQualix')
+        if hasQuality:
+            self.links = hasQuality.find_all('option')
+        else:
+            helper.log_debug('Could not find KissAnime server links; attempting to find Openload link')
+            try:
+                split_str = self.html.split('#divContentVideo')[1].split('iframe')[1].split('src=')[1].split('"')[1]
+                helper.log_debug('Split string attempt: %s' % split_str)
+                from bs4 import BeautifulSoup
+                fake_soup = BeautifulSoup('<option value="%s">Openload</option>' % split_str)
+                self.links = fake_soup.find_all('option')
+                helper.log_debug('Successfully found and parsed Openload link %s' % self.links)
+            except Exception as e:
+                self.links = []
+                helper.log_debug('Failed to parse Openload link with exception: %s' % str(e))
+                helper.show_error_dialog("Could not find supported video link for this episode/movie")
+            
     def add_items(self):
         for option in self.links:
             quality = option.string
@@ -42,14 +57,17 @@ class QualityList(WebList):
         if not url:
             return ''
 
-        from resources.lib import pyaes
-        key = '77523155af8cbed35649d6b9ad2f6a9596609be26cde24ee0334b80ae673b803'.decode('hex')
-        if (helper.debug_decrypt_key() != ''):
-            key = helper.debug_decrypt_key().decode('hex')
-        iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
-        decoded_link_val = url.decode('base-64')
-        decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
-        decrypted_link_val = decrypter.feed(decoded_link_val)
-        decrypted_link_val += decrypter.feed()
+        if 'https://' in url:
+            decrypted_link_val = url # Openload probably, since it's already a valid link
+        else:
+            from resources.lib import pyaes
+            key = '77523155af8cbed35649d6b9ad2f6a9596609be26cde24ee0334b80ae673b803'.decode('hex')
+            if (helper.debug_decrypt_key() != ''):
+                key = helper.debug_decrypt_key().decode('hex')
+            iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
+            decoded_link_val = url.decode('base-64')
+            decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
+            decrypted_link_val = decrypter.feed(decoded_link_val)
+            decrypted_link_val += decrypter.feed()
 
         return decrypted_link_val
