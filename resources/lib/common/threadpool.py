@@ -36,6 +36,7 @@ class Worker(Thread):
         self.daemon = True
         self.start()
 
+    ''' PUBLIC FUNCTIONS '''
     def run(self):
         while True:
             func, args, kargs = self.tasks.get()
@@ -55,6 +56,7 @@ class ThreadPool:
         for _ in range(num_threads):
             Worker(self.tasks)
 
+    ''' PUBLIC FUNCTIONS '''
     def add_task(self, func, *args, **kargs):
         """ Add a task to the queue """
         self.tasks.put((func, args, kargs))

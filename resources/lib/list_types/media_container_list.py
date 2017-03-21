@@ -65,7 +65,7 @@ class MediaContainerList(WebList):
 
     def worker(self, tuple):
         (name, url, idx) = tuple
-        metadata, media_type = self._get_metadata(name)
+        metadata, media_type = self.get_metadata(name)
         self.links_with_metadata[idx] = (name, url, metadata, media_type)
 
     # If title_prefix is not None, then assume we are being included inline 
@@ -118,15 +118,21 @@ class MediaContainerList(WebList):
             helper.end_of_directory()
         timestamper.stamp_and_dump('Adding all items')
 
+    def clean_tv_show_name(self, name):
+        cleaned_name = name.replace(' (TV)', '').replace(' Second Season', '').replace(' 2nd Season', '')
+        cleaned_name = self._strip_by_re(cleaned_name, '( Season [0-9])$', end=-9)
+        cleaned_name = self._strip_by_re(cleaned_name, '( S[0-9])$', end=-3)
+        cleaned_name = self._strip_by_re(cleaned_name, '( II)$', end=-3)
+        cleaned_name = self._strip_by_re(cleaned_name, '( [0-9])$', end=-2)
+        return cleaned_name
 
-    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
-    def _get_metadata(self, name):
-        helper.start('MediaContainerList._get_metadata - name: %s' % name)
+    def get_metadata(self, name):
+        helper.start('MediaContainerList.get_metadata - name: %s' % name)
         if helper.get_setting('enable-metadata') == 'false' or name == 'Next' or name == 'Last':
             return {}, ''
 
-        name_for_movie_search = self._clean_name(name)
-        name_for_tv_search = self._clean_tv_show_name(name_for_movie_search)
+        name_for_movie_search = self.clean_name(name)
+        name_for_tv_search = self.clean_tv_show_name(name_for_movie_search)
         media_type = 'tvshow'
 
         # Not sure if movie or tv show; try tv show first
@@ -143,19 +149,17 @@ class MediaContainerList(WebList):
             elif metadata['tmdb_id'] != '': # otherwise we found a move
                 media_type = 'movie'
 
-        helper.end('MediaContainerList._get_metadata')
+        helper.end('MediaContainerList.get_metadata')
         return (metadata, media_type)
 
     ''' PROTECTED FUNCTIONS '''
     def _get_contextmenu_items(self, url, name, metadata, media_type):
-        contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+        contextmenu_items = [('Show information', 'XBMC.Action(Info)')]
 
         find_metadata_query = self._construct_query(url, 'findmetadata', metadata, name)
         find_metadata_context_item = constants.runplugin % helper.build_plugin_url(find_metadata_query)
-        if self.meta.is_metadata_empty(metadata, media_type):
-            contextmenu_items.append(('Find metadata', find_metadata_context_item))
-        else:
-            contextmenu_items.append(('Fix metadata', find_metadata_context_item))
+        find_or_fix = ('Find' if self.meta.is_metadata_empty(metadata, media_type) else 'Fix') + ' metadata'
+        contextmenu_items.append((find_or_fix, find_metadata_context_item))
 
         return contextmenu_items
 
@@ -175,10 +179,3 @@ class MediaContainerList(WebList):
             links.append(link)
         return links
 
-    def _clean_tv_show_name(self, name):
-        cleaned_name = name.replace(' (TV)', '').replace(' Second Season', '').replace(' 2nd Season', '')
-        cleaned_name = self._strip_by_re(cleaned_name, '( Season [0-9])$', end=-9)
-        cleaned_name = self._strip_by_re(cleaned_name, '( S[0-9])$', end=-3)
-        cleaned_name = self._strip_by_re(cleaned_name, '( II)$', end=-3)
-        cleaned_name = self._strip_by_re(cleaned_name, '( [0-9])$', end=-2)
-        return cleaned_name

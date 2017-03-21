@@ -36,6 +36,7 @@ class TimeStamper(object):
             else:
                 self.stamp()
 
+    ''' PUBLIC FUNCTIONS '''
     def stamp(self, msg=''):
         if self.timestamps_on:
             self.timelist.append((time.time(), msg))
@@ -46,6 +47,7 @@ class TimeStamper(object):
             self.stamp(msg)
             self._dump()
 
+    ''' PROTECTED FUNCTIONS '''
     def _dump(self):
         if not self.timestamps_on:
             return

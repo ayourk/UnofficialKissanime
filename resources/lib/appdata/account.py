@@ -29,6 +29,7 @@ class Account(object):
         from resources.lib.common.nethelpers import net, cookies
         self.net, self.cookies = net, cookies
 
+    ''' PUBLIC FUNCTIONS '''
     def log_in_or_out(self):
         if self.is_logged_in():
             proceed = helper.show_yes_no_dialog('Are you sure you want to log out of your account?')
@@ -51,22 +52,6 @@ class Account(object):
             helper.close_busy_notification()
             helper.show_small_popup(msg=msg)
 
-    def _login(self, username, password):
-        url = helper.domain_url() + 'Login'
-        form_data = {'username': username, 'password': password}
-        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
-        html = helper.handle_html_errors(html, e)
-
-        logged_in = len(html) > 0
-        if logged_in:
-            helper.set_setting('username', username)
-
-        return logged_in
-    
-    def _logout(self):
-        self.net.refresh_cookies()
-        helper.set_setting('username', '')
-    
     def is_logged_in(self):
         username = helper.get_setting('username')
         if len(username) == 0:
@@ -101,6 +86,23 @@ class Account(object):
         if proceed:
             self._perform_bookmark_operation(False)
 
+    ''' PROTECTED FUNCTIONS '''
+    def _login(self, username, password):
+        url = helper.domain_url() + 'Login'
+        form_data = {'username': username, 'password': password}
+        html, e = self.net.get_html(url, self.cookies, helper.domain_url(), form_data)
+        html = helper.handle_html_errors(html, e)
+
+        logged_in = len(html) > 0
+        if logged_in:
+            helper.set_setting('username', username)
+
+        return logged_in
+    
+    def _logout(self):
+        self.net.refresh_cookies()
+        helper.set_setting('username', '')
+    
     # if add == False, remove, otherwise add
     def _perform_bookmark_operation(self, add):
         helper.start('Account._perform_bookmark_operation: %s' % ('add' if add else 'remove'))

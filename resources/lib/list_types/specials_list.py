@@ -54,7 +54,7 @@ class SpecialsList(EpisodeList):
         for link in self.links:
             name = link.string.strip()
             url = link['href']
-            metadata = self._get_metadata(name)
+            metadata = self.get_metadata(name)
             query = self._construct_query(url, action, metadata)
             helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder)
 
@@ -65,6 +65,5 @@ class SpecialsList(EpisodeList):
         helper.end('SpecialsList.add_items')
         return
 
-    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
-    def _get_metadata(self, name):
+    def get_metadata(self, name):
         return {'title' : name}

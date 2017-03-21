@@ -39,8 +39,8 @@ if helper.debug_import():
 
 if args.action == None:
     controller.Controller().main_menu()
-elif args.action == 'genericList':
-    controller.Controller().show_list()
+elif args.action == 'localList':
+    controller.Controller().show_local_list()
 elif args.action == 'mediaContainerList':
     controller.Controller().show_media_container_list()
 elif args.action == 'mediaList':
@@ -55,6 +55,8 @@ elif args.action == 'search':
     controller.Controller().search()
 elif args.action == 'findmetadata':
     controller.Controller().find_metadata()
+elif args.action == 'showqueue':
+    helper.show_queue()
 elif args.action == 'lastvisited':
     controller.Controller().show_last_visited()
 elif args.action == 'bookmarkList':

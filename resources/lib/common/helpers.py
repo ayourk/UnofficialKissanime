@@ -176,7 +176,14 @@ class Helper(Addon):
                 xbmcvfs.mkdirs(profile_path)
             except:
                 os.mkdir(profile_path)
-        return profile_path    
+        return profile_path
+
+    def show_queue(self):
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+        if playlist.size() > 0:
+            xbmc.executebuiltin('XBMC.Action(Playlist)')
+        else:
+            self.show_small_popup('Notification from UKAP', 'Queue is currently empty')
 
 
 helper = init()

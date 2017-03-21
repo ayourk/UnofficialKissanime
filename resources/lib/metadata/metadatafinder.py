@@ -51,16 +51,16 @@ class MetadataFinder(object):
 
         helper.show_busy_notification()
         mc_list = media_container_list.MediaContainerList(None)
-        metadata, media_type = mc_list._get_metadata(search_string)
+        metadata, media_type = mc_list.get_metadata(search_string)
 
         # Grab the ID and the actual title, which might have gotten stripped of
         # the year because of a mismatch...
         if media_type == 'tvshow':
             tmdb_id = metadata.get('tvdb_id', '')
-            actual_title = mc_list._clean_tv_show_name(mc_list._clean_name(args.full_mc_name))
+            actual_title = mc_list.clean_tv_show_name(mc_list.clean_name(args.full_mc_name))
         else:
             tmdb_id = metadata.get('tmdb_id', '')
-            actual_title = mc_list._clean_name(args.full_mc_name)
+            actual_title = mc_list.clean_name(args.full_mc_name)
 
         helper.log_debug('Metadatafinder results: %s, %s, %s' % (tmdb_id, media_type, metadata))
         if tmdb_id:

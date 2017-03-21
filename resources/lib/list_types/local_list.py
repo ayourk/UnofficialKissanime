@@ -25,6 +25,7 @@ from resources.lib.common import constants
 
 
 class LocalList(object):
+    ''' PUBLIC FUNCTIONS '''
     def add_directories(self, src):
         helper.start('LocalList.add_directories')
         helper.set_content('addons')

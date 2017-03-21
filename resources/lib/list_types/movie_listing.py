@@ -46,6 +46,7 @@ class MovieListing(EpisodeList):
             from resources.lib.common.nethelpers import net, cookies
             self.net, self.cookies = net, cookies
         
+    ''' PUBLIC FUNCTIONS '''
     def add_items(self):
         helper.start('MovieListing.add_items')
         helper.set_content('movies')
@@ -56,14 +57,14 @@ class MovieListing(EpisodeList):
             name = link.string.strip()
             url = link['href']
             if self.mismatch:
-                metadata = self._get_metadata(self._clean_name(args.full_mc_name))
+                metadata = self.get_metadata(self.clean_name(args.full_mc_name))
                 if self.meta.is_metadata_empty(metadata, 'movie'):
-                    metadata = self._get_metadata(args.base_mc_name)
+                    metadata = self.get_metadata(args.base_mc_name)
             else:
-                metadata = self._get_metadata(args.base_mc_name)
+                metadata = self.get_metadata(args.base_mc_name)
             query = self._construct_query(url, action, metadata)
             metadata['title'] = name
-            contextmenu_items = [('Show Information', 'XBMC.Action(Info)'), ('Queue movie', 'XBMC.Action(Queue)')]
+            contextmenu_items = self._get_contextmenu_items()
             helper.add_directory(query, metadata, img=args.icon, fanart=args.fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
 
         self._add_related_links()
@@ -73,8 +74,7 @@ class MovieListing(EpisodeList):
         helper.end('MovieListing.add_items')
         return
 
-    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
-    def _get_metadata(self, name):
+    def get_metadata(self, name):
         if helper.get_setting('enable-metadata') == 'false':
             return {}
 

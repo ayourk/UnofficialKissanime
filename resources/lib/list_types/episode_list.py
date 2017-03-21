@@ -22,6 +22,7 @@
 
 import re, unicodedata
 from datetime import datetime
+from resources.lib.common import constants
 from resources.lib.common.args import args
 from resources.lib.common.helpers import helper
 from resources.lib.list_types.web_list import WebList
@@ -142,7 +143,7 @@ class EpisodeList(WebList):
 
         specials = []
         episodes = []
-        double_eps = 0
+        double_eps, half_eps = 0, 0
         for link in self.links:
             name = link.string.strip()
             url = link['href']
@@ -151,35 +152,34 @@ class EpisodeList(WebList):
             else:
                 ascii_name = name
             name_minus_show = ascii_name.replace(args.full_mc_name, '')
-            if re.search('( .?Special ([0-9]?){0,2}[0-9])$', name) != None:
+            if self.__is_episode_special(name, name_minus_show):
                 specials.append((name, url))
-            elif 'recap' in name_minus_show.lower() or '.5' in name_minus_show:
-                specials.append((name, url))
-            elif 'preview' in name_minus_show.lower():
-                specials.append((name, url))
-            elif re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None:
-                double_eps += 1
-                episodes.append((name, url))
             else:
+                if self.__is_double_episode(name):
+                    double_eps += 1
+                elif self.__is_half_episode(name):
+                    half_eps += 1
                 episodes.append((name, url))
 
-        self.num_episodes = len(episodes) + double_eps
-        helper.log_debug('We have %d episodes' % self.num_episodes)
+        self.num_episodes = len(episodes) + double_eps - half_eps
+        helper.log_debug('We have effectively %d episodes with %s double episodes and %d half episodes' % (self.num_episodes, double_eps, half_eps))
         action, is_folder = self._get_action_and_isfolder()
 
-        all_metadata = self._get_metadata(args.base_mc_name)
+        all_metadata = self.get_metadata(args.base_mc_name)
         helper.log_debug('We have %d metadata entries' % len(all_metadata))
         offset = 0
         for idx, (name, url) in enumerate(episodes):
-            metadata = all_metadata[idx+offset] if len(all_metadata) > 0 else {'title':name}
+            if self.__is_half_episode(name):
+                offset -= 1
+            metadata = all_metadata[idx+offset] if idx+offset < len(all_metadata) else {'title':name}
             icon, fanart = self._get_art_from_metadata(metadata)
             query = self._construct_query(url, action, metadata)
-            contextmenu_items = [('Show Information', 'XBMC.Action(Info)'), ('Queue episode', 'XBMC.Action(Queue)')]
-            if re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None:
+            if self.__is_double_episode(name):
                 metadata['title'] = '%d & %d - %s' % ((idx+offset+1), (idx+offset+2), metadata['title'])
                 offset += 1
             else:
                 metadata['title'] = '%d - %s' % ((idx+offset+1), metadata['title'])
+            contextmenu_items = self._get_contextmenu_items(url, name)
             helper.add_directory(query, metadata, img=icon, fanart=fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
 
         if len(specials) > 0:
@@ -198,8 +198,7 @@ class EpisodeList(WebList):
         helper.end('EpisodeList.add_items')
         return
 
-    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
-    def _get_metadata(self, name):
+    def get_metadata(self, name):
         if (helper.get_setting('enable-metadata') == 'false' or 
             (args.imdb_id == None and args.tvdb_id == None)):
             return []
@@ -210,6 +209,13 @@ class EpisodeList(WebList):
         return all_metadata
 
     ''' PROTECTED FUNCTIONS '''
+    def _get_contextmenu_items(self, url, name):
+        contextmenu_items = [('Show information', 'XBMC.Action(Info)'), ('Queue item', 'XBMC.Action(Queue)')]
+        show_queue_query = self._construct_query('', 'showqueue')
+        show_queue_context_item = constants.runplugin % helper.build_plugin_url(show_queue_query)
+        contextmenu_items.append(('Show queue', show_queue_context_item))
+        return contextmenu_items
+
     def _get_art_for_season0(self):
         helper.start('_get_art_for_season0 for name %s and imdb_id %s' % (args.base_mc_name, args.imdb_id))
         if helper.get_setting('enable-metadata') == 'false':
@@ -246,7 +252,7 @@ class EpisodeList(WebList):
     def __determine_season(self):
         # 3.1) The next best thing is to examine the full name vs the base 
         # name and look for any season stuff
-        clean_mc_name = self._clean_name(args.full_mc_name)
+        clean_mc_name = self.clean_name(args.full_mc_name)
         leftovers = clean_mc_name.replace(args.base_mc_name, '')
         season = self.__extract_season(leftovers)
         if season != None:
@@ -278,3 +284,21 @@ class EpisodeList(WebList):
         elif re.search('( [0-9])$', name):
             season = name[-1]
         return season
+
+    def __is_episode_special(self, name, name_minus_show):
+        is_special = re.search('( .?Special ([0-9]?){0,2}[0-9])$', name) != None or \
+            'recap' in name_minus_show.lower() or \
+            '.5' in name_minus_show or \
+            'preview' in name_minus_show.lower() or \
+            re.search('( _Episode [0-9]{1,3})', name) != None or \
+            re.search('( _Opening)', name) != None or \
+            re.search('( _Ending)', name) != None
+        return is_special
+
+    def __is_double_episode(self, name):
+        is_double = re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None
+        return is_double
+
+    def __is_half_episode(self, name):
+        is_half = re.search('( Episode [0-9]{1,3}[Bb])$', name) != None
+        return is_half

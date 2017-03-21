@@ -27,12 +27,12 @@ appdata_cache_path = 'appdata.db'
 
 
 submenu_browse = [
-    ('A-Z', {'srctype':'local', 'value':'submenu_alphabet', 'action':'genericList'}),
+    ('A-Z', {'srctype':'local', 'value':'submenu_alphabet', 'action':'localList'}),
     ('Popular', {'srctype':'web', 'value':'AnimeList/MostPopular', 'action':'mediaContainerList'}),
     ('Last updated', {'srctype':'web', 'value':'AnimeList/LatestUpdate', 'action':'mediaContainerList'}),
     ('Newest', {'srctype':'web', 'value':'AnimeList/Newest', 'action':'mediaContainerList'}),
     ('Upcoming', {'srctype':'web', 'value':'UpcomingAnime', 'action':'mediaContainerList'}),
-    ('Genre', {'srctype':'local', 'value':'submenu_genres', 'action':'genericList'}),
+    ('Genre', {'srctype':'local', 'value':'submenu_genres', 'action':'localList'}),
     ('Ongoing', {'srctype':'web', 'value':'Status/Ongoing/MostPopular', 'action':'mediaContainerList'}),
     ('Completed', {'srctype':'web', 'value':'Status/Ongoing/MostPopular', 'action':'mediaContainerList'})
 ]
@@ -120,7 +120,7 @@ submenu_genres = [
 
 main_menu = [
     ('Last Anime Visited', {'srctype':'web', 'value':'sql', 'action':'lastvisited'}),
-    ('Browse', {'srctype':'local', 'value':'submenu_browse', 'action':'genericList'}),
+    ('Browse', {'srctype':'local', 'value':'submenu_browse', 'action':'localList'}),
     ('Bookmarks', {'srctype':'web', 'value':'BookmarkList', 'action':'bookmarkList'}),
     ('Search', {'srctype': 'web', 'value':'dialog_search', 'action':'search'}),
     ('Settings', {'srctype': 'local', 'value':'settings', 'action':'settings'})

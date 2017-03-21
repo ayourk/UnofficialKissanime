@@ -30,12 +30,13 @@ class AutoPlayer(QualityList, VideoPlayer):
         QualityList.__init__(self)
         VideoPlayer.__init__(self, url)
 
+    ''' PUBLIC FUNCTIONS '''
     def add_items(self):
         preset_quality = int(helper.get_setting('preset-quality').strip('p'))
-
+        
         for option in self.links:
             quality = option.string
-            if preset_quality >= int(quality.strip('p')):
+            if quality == 'Openload' or preset_quality >= int(quality.replace('Default quality - ', '').strip('p')):
                 helper.log_debug('Found media to play at matching quality: %s' % quality)
                 url_to_play = option['value']
                 break
@@ -45,4 +46,4 @@ class AutoPlayer(QualityList, VideoPlayer):
             helper.log_debug('No matching quality found; using the lowest available')
             url_to_play = encoded_links[-1]['value']
 
-        self.link = self.decode_link(url_to_play)
+        self.link = self._decode_link(url_to_play)

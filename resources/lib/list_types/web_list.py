@@ -58,8 +58,19 @@ class WebList(object):
     def add_items(self):
         pass
 
-    def _get_metadata(self):
+    def get_metadata(self):
         pass
+
+    def clean_name(self, name, specials=True):
+        cleaned_name = name.replace(' (Sub)', '').replace(' (Dub)', '')
+        if specials:
+            cleaned_name = cleaned_name.replace (' (OVA)', '').replace (' Specials ', '')
+            cleaned_name = self._strip_by_re(cleaned_name, '( OVA)$', end=-4)
+            cleaned_name = self._strip_by_re(cleaned_name, '( Special)$', end=-8)
+            cleaned_name = self._strip_by_re(cleaned_name, '( Specials)$', end=-9)
+        cleaned_name = self._strip_by_re(cleaned_name, '( \(1080p\))$', end=-8)
+        cleaned_name = self._strip_by_re(cleaned_name, '( \((720|480|360)p\))$', end=-8)
+        return cleaned_name
 
     def _filter_html(self, html):
         new_lines = []
@@ -89,13 +100,3 @@ class WebList(object):
     def _strip_by_re(self, string, filter, end, start=0):
         return string[start:end] if re.search(filter, string) != None else string
 
-    def _clean_name(self, name, specials=True):
-        cleaned_name = name.replace(' (Sub)', '').replace(' (Dub)', '')
-        if specials:
-            cleaned_name = cleaned_name.replace (' (OVA)', '').replace (' Specials ', '')
-            cleaned_name = self._strip_by_re(cleaned_name, '( OVA)$', end=-4)
-            cleaned_name = self._strip_by_re(cleaned_name, '( Special)$', end=-8)
-            cleaned_name = self._strip_by_re(cleaned_name, '( Specials)$', end=-9)
-        cleaned_name = self._strip_by_re(cleaned_name, '( \(1080p\))$', end=-8)
-        cleaned_name = self._strip_by_re(cleaned_name, '( \((720|480|360)p\))$', end=-8)
-        return cleaned_name

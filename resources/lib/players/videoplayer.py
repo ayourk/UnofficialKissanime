@@ -28,6 +28,7 @@ class VideoPlayer:
         helper.log_debug('Initializing VideoPlayer with url: %s' % url)
         self.link = url
 
+    ''' PUBLIC FUNCTIONS '''
     def play(self):
         import urlresolver
 
@@ -44,6 +45,7 @@ class VideoPlayer:
         try:
             url = urlresolver.resolve(self.link)
         except:
+            helper.log_debug('Attempt to resolve URL failed; trying again with SSL temporarily disabled (v16 behavior)')
             import ssl
             default_context = ssl._create_default_https_context # save default context
             ssl._create_default_https_context = ssl._create_unverified_context

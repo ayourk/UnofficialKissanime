@@ -45,11 +45,11 @@ class Controller:
             main_menu[0] = (title, queries)
         return main_menu
 
-    def show_list(self):
-        helper.start("show_list")
+    def show_local_list(self):
+        helper.start("show_local_list")
         from resources.lib.list_types.local_list import LocalList
         LocalList().add_directories(constants.ui_table[args.value])
-        helper.end("show_list")
+        helper.end("show_local_list")
         return
 
     def _show_list(self, list):

@@ -259,7 +259,7 @@ class LooseMetaData(MetaData):
             row2 = self.__cache_find_absolute_episode(tvdb_id, try2, season)
             if row == None and row2 == None:
                 return []
-            elif row2 != None:
+            elif row == None and row2 != None:
                 row = row2
 
         first_ep = row['absolute_episode']

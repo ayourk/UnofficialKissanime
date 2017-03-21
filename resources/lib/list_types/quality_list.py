@@ -25,7 +25,7 @@ from resources.lib.common.helpers import helper
 
 
 class QualityList(WebList):
-    ''' OVERRIDDEN PROTECTED FUNCTIONS '''
+    ''' PUBLIC FUNCTIONS '''
     def parse(self):
         if self.soup == None:
             return
@@ -37,7 +37,8 @@ class QualityList(WebList):
         else:
             helper.log_debug('Could not find KissAnime server links; attempting to find Openload link')
             try:
-                video_str = self._get_default_video_link()
+                # The Openload link is the default video link
+                video_str = self.__get_default_video_link()
                 from bs4 import BeautifulSoup
                 fake_soup = BeautifulSoup('<option value="%s">Openload</option>' % video_str, "html.parser")
                 self.links = fake_soup.find_all('option')
@@ -45,19 +46,20 @@ class QualityList(WebList):
             except Exception as e:
                 self.links = []
                 helper.log_debug('Failed to parse Openload link with exception: %s' % str(e))
-                helper.show_error_dialog("Could not find supported video link for this episode/movie")
+                helper.show_error_dialog(['Could not find supported video link for this episode/movie'])
             
     def add_items(self):
         num_links = len(self.links)
         for option in self.links:
             quality = option.string
-            link_val = self.decode_link(option['value'])
+            link_val = self._decode_link(option['value'])
 
-            # If we failed to decode the link, then we'll just use the already selected option and ignore the rest
-            if link_val == '':
+            # If we failed to decode the link, then we'll just use the already selected option 
+            # and ignore the rest
+            if not link_val:
                 selected_quality_opt = self.quality_options.find('option', selected=True)
                 quality = 'Default quality - %s' % selected_quality_opt.string
-                link_val = self._get_default_video_link()
+                link_val = self.__get_default_video_link()
                 num_links = 1
 
             query = self._construct_query(link_val, 'play')
@@ -67,64 +69,93 @@ class QualityList(WebList):
 
         helper.end_of_directory()
 
-    def decode_link(self, url):
+    ''' PROTECTED FUNCTIONS '''
+    def _decode_link(self, url):
         if not url:
-            return ''
+            return None
 
-        helper.log_debug('URL to decode: %s' % url)
-        if 'https://' in url:
+        if 'https://' in url or 'http://' in url:
             decoded_link_val = url # Openload probably, since it's already a valid link
         else:
-            decoded_link_val = self._decrypt_link(url.decode('base64'))
+            helper.log_debug('URL to decode: %s' % url)
+            try:
+                decoded_link_val = self.__decrypt_link(url.decode('base64'))
+                helper.log_debug('Decoded URL: %s' % decoded_link_val)
+            except Exception as e:
+                decoded_link_val = None
+                helper.log_debug('Failed to decode the link with exception %s' % str(e))
 
         return decoded_link_val
 
-    def _get_default_video_link(self):
+    ''' PRIVATE FUNCTIONS '''
+    def __get_default_video_link(self):
         video_str = self.html.split('#divContentVideo')[1].split('iframe')[1].split('src=')[1].split('"')[1]
         helper.log_debug('Got default video string: %s' % video_str)
         return video_str
 
-    def _decrypt_text(self, key, iv, txt):
+    def __decrypt_link(self, url):
+        iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
+        if (helper.debug_decrypt_key() != ''):
+            helper.log_debug('Using the key input from the debug settings')
+            key = helper.debug_decrypt_key().decode('hex')
+        else:
+            helper.log_debug('Attempting to get key from html')
+            key = self.__get_key_from_html()
+
+        return self.__decrypt_text(key, iv, url)
+
+    def __decrypt_text(self, key, iv, txt):
         from resources.lib import pyaes
         decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
         decrypted_txt = decrypter.feed(txt)
         decrypted_txt += decrypter.feed()
         return decrypted_txt
 
-    def _decrypt_link(self, url):
-        iv = 'a5e8d2e9c1721ae0e84ad660c472c1f3'.decode('hex')
-        if (helper.debug_decrypt_key() != ''):
-            helper.log_debug('Using the key input in the debug settings')
-            key = helper.debug_decrypt_key().decode('hex')
-        else:
-            key = self._get_key_from_html()
+    def __get_key_from_html(self):
+        # Find the last line to set skH, the seed to the key
+        set_skH_dict = {}
+        for filename in ['vr.js', 'skH =']:
+            set_skH_dict[filename] = self.html.rfind(filename)
+        
+        sorted_skH = sorted(set_skH_dict, key=set_skH_dict.get, reverse=True)
+        last_set_skH_file = sorted_skH[0]
+        last_set_skH_line = set_skH_dict[last_set_skH_file]
 
-        try:
-            decrypted_link_val = self._decrypt_text(key, iv, url)
-            helper.log_debug('Successfully decrypted link %s' % decrypted_link_val)
-        except Exception as e:
-            helper.log_debug('Failed to decrypt the link with exception %s' % str(e))
-            decrypted_link_val = ''
+        skH = self.__get_base_skH(last_set_skH_file)
 
-        return decrypted_link_val
+        # Find modifications after the last line that sets skH
+        js_dict = {}
+        for f in ['shal.js', 'moon.js', 'file3.js']:
+            line_num = self.html.find(f)
+            if line_num > last_set_skH_line:
+                js_dict[f] = self.html.find(f)
 
-    def _get_base_skH(self, filename):
+        # Sort and then apply modifications in order of appearance
+        for filename in sorted(js_dict, key=js_dict.get, reverse=False):
+            skH = self.__update_skH(skH, filename)
+
+        import hashlib
+        key = hashlib.sha256(skH).hexdigest()
+        helper.log_debug('Found the decryption key: %s' % key)
+        
+        return key.decode('hex')
+
+    def __get_base_skH(self, filename):
         if filename == 'vr.js':
             return 'nhasasdbasdtene7230asb'
         elif filename == 'skH =':
             # We need to find the last skH before ovelwrap
             split1 = self.html.split("ovelWrap($('#slcQualix').val())")[0]
             split2 = split1.split('skH =')[-2]
-            da_list_str = '[' + split2.split('[')[-1].strip('; ')
+            obfuscated_list_str = '[' + split2.split('[')[-1].strip('; ')
             import ast
-            da_list = ast.literal_eval(da_list_str)
-            helper.log_debug('da_list %s' % da_list)
-            return da_list[0]
+            obfuscated_list = ast.literal_eval(obfuscated_list_str)
+            return obfuscated_list[0]
         else:
-            helper.log_debug('Do not recognize base skH file')
+            helper.log_debug('Failed to recognize base skH file %s' % filename)
             return ''
 
-    def _get_modified_skH(self, skH, filename):
+    def __update_skH(self, skH, filename):
         if filename == 'shal.js':
             return skH + '6n23ncasdln213'
         elif filename == 'moon.js':
@@ -132,42 +163,5 @@ class QualityList(WebList):
         elif filename == 'file3.js':
             return skH.replace('a', 'c')
         else:
-            helper.log_debug('Do not recognize skH modifier file')
+            helper.log_debug('Failed to recognize skH modifier file %s' % filename)
             return skH
-
-    def _get_key_from_html(self):
-        helper.log_debug('Attempting to get key from html')
-
-        set_skH_code = ['vr.js', 'skH =']
-        set_skH_dict = {}
-        for f in set_skH_code:
-            set_skH_dict[f] = self.html.rfind(f)
-        
-        # Find latest key setter
-        sorted_skH = sorted(set_skH_dict, key=set_skH_dict.get, reverse=True)
-        last_set_skH_file = sorted_skH[0]
-        last_set_skH_line = set_skH_dict[last_set_skH_file]
-
-        skH = self._get_base_skH(last_set_skH_file)
-
-        # Find modifications
-        js_files = ['shal.js', 'moon.js', 'file3.js']
-        js_dict = {}
-        for f in js_files:
-            js_dict[f] = self.html.find(f)
-
-        # Filter modifications if they come before the line that sets skH
-        js_dict = {k: v for k, v in js_dict.iteritems() if v > last_set_skH_line}
-
-        # Sort the modifications by appearance
-        sorted_js = sorted(js_dict, key=js_dict.get, reverse=False)
-
-        # Apply the modification
-        for k in sorted_js:
-            skH = self._get_modified_skH(skH, k)
-
-        import hashlib
-        key = hashlib.sha256(skH).hexdigest()
-        helper.log_debug('Found the key: %s' % key)
-        
-        return key.decode('hex')

@@ -35,6 +35,20 @@ class LastVisited(object):
         self.dbcur = self.dbcon.cursor()
         self.__createTable()
 
+    ''' PUBLIC FUNCTIONS '''
+    def get_prev_page(self):
+        return self.__get_row('previouspage')
+
+    def update_prev_page(self):
+        self.__update_row('previouspage')
+
+    def get_last_anime_visited(self):
+        return self.__get_row('lastanimevisited')
+
+    def update_last_anime_visited(self):
+        self.__update_row('lastanimevisited')
+
+    ''' PRIVATE FUNCTIONS '''
     def __createTable(self):
         sql_create = 'CREATE TABLE IF NOT EXISTS last_visited ('\
             'id TEXT, '\
@@ -74,14 +88,3 @@ class LastVisited(object):
         self.dbcur.execute(sql_update, data)
         self.dbcon.commit()
 
-    def get_prev_page(self):
-        return self.__get_row('previouspage')
-
-    def update_prev_page(self):
-        self.__update_row('previouspage')
-
-    def get_last_anime_visited(self):
-        return self.__get_row('lastanimevisited')
-
-    def update_last_anime_visited(self):
-        self.__update_row('lastanimevisited')

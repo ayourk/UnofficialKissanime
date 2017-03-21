@@ -58,6 +58,9 @@ Users can see the last anime they visited from the main menu, for quick access f
 ### Quality selection
 The default quality of the video can be selected in the settings or individually for each piece of media.
 
+### Queueing
+If the "Preset Quality" in the settings is set to a quality value that's not "Individually select", users can queue items into a playlist and then play the playlist without interruption.
+
 ### Widget support
 Widgets in supported skins can be populated with any page of the plugin (except search), including the bookmarks and the last anime visited.  Note, however, that having the widgets reload every time could cause KissAnime to throw some errors at you though!
 
