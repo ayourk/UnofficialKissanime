@@ -97,3 +97,4 @@ plugin.video.unofficialkissanime.zip
 *.zip
 *cmd
 /resources/Thumbs.db
+/resources/media/Thumbs.db
