@@ -1,5 +1,10 @@
 # UKAP: The Unofficial KissAnime Plugin
-An unofficial KissAnime client for Kodi, designed for the Fire Stick, Fire TV, and Windows.
+An unofficial KissAnime client for Kodi version 16 and newer, designed for the Fire Stick, Fire TV, and Windows.
+
+ - [Installation](#installation)
+ - [Features](#features)
+ - [Known Issues](#known-issues)
+ - [Future plans](#future-plans)
 
 ## Installation
 Download the repo from [here](https://github.com/dat1guy/dat1guyRepository).  Once installed to Kodi, install the add-on from the repository from within Kodi.
@@ -57,6 +62,7 @@ The default quality of the video can be selected in the settings or individually
 Widgets (in supported skins) can be populated with any page of the plugin (minus search), including the bookmarks and the last anime visited.  Note, however, that having the widgets reload every time could cause KissAnime to throw some errors at you though!
 
 ## Known issues
+ - Metadata for movies is pretty lackluster by default. Users can get better results by inputting a [TMDB API key](https://www.themoviedb.org/faq/api?language=en) in the settings.
  - Fixing or finding metadata from the search page brings up the search box, prompting the user to re-enter the original search query.
  - Getting metadata for movies may fail if you don't have your own key.
  - This isn't really an issue, but toggling bookmarks is a bit annoying at the moment (it was implemented this way based on what the site does).  Alternatives should be explored if possible.

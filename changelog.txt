@@ -1,3 +1,13 @@
+v1.2.0 (2017-03-20)
+ - Fixed benign Beautiful Soup "html.parser" error
+ - The decryption key is now dynamically generated, based on hard-coded information
+ - Added default video option if unable to decrypt the video links from the quality options
+ - Updated addon.xml for Krypton
+ - Updated license snippets to conform to multi-file program standards
+ - The content type is now properly set
+ - Added screenshots
+ - Updated README with ToC and reference to TMDB API keys
+
 v1.1.0 (2017-01-18)
  - Implemented Openload support if KissAnime servers are not available
 
