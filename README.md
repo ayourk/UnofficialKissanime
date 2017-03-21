@@ -66,6 +66,7 @@ Widgets in supported skins can be populated with any page of the plugin (except 
  - Fixing or finding metadata from the search page brings up the search box, prompting the user to re-enter the original search query.
  - Getting metadata for movies may fail if you don't have your own key.
  - This isn't really an issue, but toggling bookmarks is a bit annoying at the moment (it was implemented this way based on what the site does).  Alternatives should be explored if possible.
+ - Queueing an entire show results in an infinite loop.
 
 ## Future plans
  - Add list support

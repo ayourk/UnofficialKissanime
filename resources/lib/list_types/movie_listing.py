@@ -63,7 +63,7 @@ class MovieListing(EpisodeList):
                 metadata = self._get_metadata(args.base_mc_name)
             query = self._construct_query(url, action, metadata)
             metadata['title'] = name
-            contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+            contextmenu_items = [('Show Information', 'XBMC.Action(Info)'), ('Queue movie', 'XBMC.Action(Queue)')]
             helper.add_directory(query, metadata, img=args.icon, fanart=args.fanart, is_folder=is_folder, contextmenu_items=contextmenu_items)
 
         self._add_related_links()

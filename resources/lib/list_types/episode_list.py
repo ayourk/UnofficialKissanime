@@ -174,7 +174,7 @@ class EpisodeList(WebList):
             metadata = all_metadata[idx+offset] if len(all_metadata) > 0 else {'title':name}
             icon, fanart = self._get_art_from_metadata(metadata)
             query = self._construct_query(url, action, metadata)
-            contextmenu_items = [('Show Information', 'XBMC.Action(Info)')]
+            contextmenu_items = [('Show Information', 'XBMC.Action(Info)'), ('Queue episode', 'XBMC.Action(Queue)')]
             if re.search('( Episode [0-9]{1,3}-[0-9]{0,3})$', name) != None:
                 metadata['title'] = '%d & %d - %s' % ((idx+offset+1), (idx+offset+2), metadata['title'])
                 offset += 1

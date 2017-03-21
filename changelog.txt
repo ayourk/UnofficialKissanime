@@ -1,3 +1,6 @@
+v1.2.1 (2017-03-20)
+- Added context menu option to queue episodes and movies
+
 v1.2.0 (2017-03-20)
  - Fixed benign Beautiful Soup "html.parser" error
  - The decryption key is now dynamically generated, based on hard-coded information
