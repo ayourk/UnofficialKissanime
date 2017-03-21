@@ -15,9 +15,9 @@ This plugin was made as a simpler alternative to the fantastic and feature-packe
 This plugin hopes to improve over the original in a few key areas.
 
 ### Speed
-Speed has been an emphasis for this plugin on the slowest popular platform (the Amazon Fire Stick) from day 1, especially for the menus that don't require accessing the site as well as the pages that list the episodes of a particular show.  Everything has been benchmarked on the Fire Stick and compared to other popular apps.  
+Speed has been an emphasis for this plugin on the slowest popular platform, the Amazon Fire Stick, from day 1, especially for the menus that don't require accessing the website as well as the pages that list the episodes of a particular show.  Everything has been benchmarked on the Fire Stick and compared to other popular apps.  
 
-If the plugin is taking a while to load a page, chances are it's the KissAnime website itself, which usually takes 4-5 seconds on good days to serve content, or a blocked metadata request (and metadata support can be turned off).
+If the plugin is taking a while to load a page, chances are it's the KissAnime website itself, which usually takes 4-5 seconds on good days to serve content, or a blocked metadata request.  Note that metadata can be turned off if speed is a primary concern.
 
 ### Metadata support
 Getting metadata for anime shows has traditionally been a hard problem for primarily 2 reasons:
@@ -50,7 +50,7 @@ Users can browse the plugin just like the KissAnime website, which includes cate
 Users can search for shows through the plugin.  The search function actually uses the website's Advanced Search function, which is surprisingly much more accurate for finding certain shows.
 
 ### Account bookmarks
-Users can log in to their accounts and browse and modify their bookmarks (no folder support yet).  The username and password are not saved at all by the plugin.
+Users can log in to their accounts and browse and modify their bookmarks.  The username and password are not saved at all by the plugin.  Folders are not supported at the moment.
 
 ### Last Anime Visited
 Users can see the last anime they visited from the main menu, for quick access for continuing a series.
@@ -59,7 +59,7 @@ Users can see the last anime they visited from the main menu, for quick access f
 The default quality of the video can be selected in the settings or individually for each piece of media.
 
 ### Widget support
-Widgets (in supported skins) can be populated with any page of the plugin (minus search), including the bookmarks and the last anime visited.  Note, however, that having the widgets reload every time could cause KissAnime to throw some errors at you though!
+Widgets in supported skins can be populated with any page of the plugin (except search), including the bookmarks and the last anime visited.  Note, however, that having the widgets reload every time could cause KissAnime to throw some errors at you though!
 
 ## Known issues
  - Metadata for movies is pretty lackluster by default. Users can get better results by inputting a [TMDB API key](https://www.themoviedb.org/faq/api?language=en) in the settings.
