@@ -1,7 +1,10 @@
+v1.2.2.3 (2017-03-22)
+- Fixed bug where autoplayer would crash if the preset quality was below the lowest quality
+
 v1.2.2.2 (2017-03-21)
  - Fixed bug where context menu items are not added correctly to movies, causing a crash
  
- v1.2.2.1 (2017-03-21)
+v1.2.2.1 (2017-03-21)
  - Fixed BeautifulSoup bad tag error in v16
 
 v1.2.2 (2017-03-21)

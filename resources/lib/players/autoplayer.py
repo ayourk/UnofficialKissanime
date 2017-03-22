@@ -41,9 +41,8 @@ class AutoPlayer(QualityList, VideoPlayer):
                 url_to_play = option['value']
                 break
 
-        assert(len(encoded_links) > 0)
         if url_to_play == None:
             helper.log_debug('No matching quality found; using the lowest available')
-            url_to_play = encoded_links[-1]['value']
+            url_to_play = self.links[-1]['value']
 
         self.link = self._decode_link(url_to_play)
