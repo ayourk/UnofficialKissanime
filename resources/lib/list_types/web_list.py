@@ -75,8 +75,9 @@ class WebList(object):
     def _filter_html(self, html):
         new_lines = []
         for line in html.split('\n'):
-            if 'Please disable AdBlock' not in line:
-                new_lines.append(line)
+            if 'Please disable AdBlock' in line or "</scr'+'ipt>" in line:
+                continue
+            new_lines.append(line)
         html = '\n'.join(new_lines)
         return html
 

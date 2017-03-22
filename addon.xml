@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<addon id="plugin.video.unofficialkissanime" version="1.2.2" name="The Unofficial KissAnime Plugin" provider-name="dat1guy">
+<addon id="plugin.video.unofficialkissanime" version="1.2.2.1" name="The Unofficial KissAnime Plugin" provider-name="dat1guy">
     <requires>
         <import addon="xbmc.python" version="2.24.0" />
         <import addon="script.module.beautifulsoup4" />
@@ -15,7 +15,7 @@
         <summary lang="en">The Unofficial KissAnime Plugin</summary>
         <description lang="en">An unofficial KissAnime client for Kodi, designed for the Fire Stick, Fire TV, and Windows.</description>
         <disclaimer lang="en">The author does not host or distribute any of the content displayed by this addon. The author does not have any affiliation with the content provider.</disclaimer>
-        <news>v1.2.2 (2017-03-21)
+        <news>v1.2.2.1 (2017-03-21)
 - Fixed benign Beautiful Soup "html.parser" error
 - The decryption key is now dynamically generated, based on hard-coded information
 - Added default video option if unable to decrypt the video links from the quality options
@@ -26,7 +26,8 @@
 - Updated README with ToC and reference to TMDB API keys
 - Added context menu options to queue episodes and movies as well as to show the queue
 - Fixed openload error when preset quality is set to a quality value
-- Miscellaneous code clean up</news>
+- Miscellaneous code clean up
+- Fixed BeautifulSoup bad tag error in v16</news>
         <platform>all</platform>
         <language>en</language>
         <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>

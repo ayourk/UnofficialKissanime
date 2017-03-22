@@ -1,3 +1,6 @@
+v1.2.2.1 (2017-03-21)
+ - Fixed BeautifulSoup bad tag error in v16
+
 v1.2.2 (2017-03-21)
  - Added context menu option to show queue when viewing a series or a movie
  - Fixed openload error when preset quality is set to a quality value
